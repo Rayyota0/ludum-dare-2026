@@ -8218,6 +8218,11 @@ GameObject:
   - component: {fileID: 1483032894}
   - component: {fileID: 1483032893}
   - component: {fileID: 1483032892}
+  - component: {fileID: 1483032900}
+  - component: {fileID: 1483032901}
+  - component: {fileID: 1483032902}
+  - component: {fileID: 1483032903}
+  - component: {fileID: 1483032904}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -8343,6 +8348,87 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &1483032900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483032890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03acfe9721c2b9f10a1412ea9c72a612, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.DenseFogBootstrap
+  fogColor: {r: 0.82, g: 0.82, b: 0.86, a: 1}
+  fogDensity: 0.2
+  useLinearFog: 1
+  linearFogStart: 5
+  linearFogEnd: 18
+--- !u!114 &1483032901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483032890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7b3c9d2e5f1486092d8e1c4f7a0b3e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.LegacyRenderSettingsFogDriver
+--- !u!114 &1483032902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483032890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5889ab9cadf7f6a269b80e1efdd7efaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.VoskSignalKeywordSource
+  modelRelativePath: vosk-model-small-ru
+  microphoneDevice: 
+  sampleRate: 16000
+  chunkMaxSamples: 4096
+  logKeywordFinal: 1
+  logKeywordPartial: 0
+--- !u!114 &1483032903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483032890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29e3b2f7a3b687a63b5a3b63c52869c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.SignalFogBurst
+  cameraTransform: {fileID: 1483032891}
+  fadeClearSeconds: 2.4
+  holdClearSeconds: 3
+  fadeRestoreSeconds: 2.2
+  cooldownAfterCycleSeconds: 5
+  enableSpotPulse: 0
+  spotPeakIntensity: 8
+  spotRange: 35
+  spotSpotAngle: 55
+  spotColor: {r: 0.85, g: 0.92, b: 1, a: 1}
+--- !u!114 &1483032904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483032890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fcff6a5e3d67e3fc86d4d8582b38909, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.VoiceFogInstallMarker
 --- !u!1 &1499750591
 GameObject:
   m_ObjectHideFlags: 0

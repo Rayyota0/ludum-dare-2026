@@ -44,3 +44,7 @@ crashlytics-build.properties
 *.mdb
 *.opendb
 *.VC.db
+
+# Unity editor recovery dumps (must be after !/[Aa]ssets/**/*.meta)
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta

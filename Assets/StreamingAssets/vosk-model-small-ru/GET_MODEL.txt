@@ -1,0 +1,5 @@
+Download and extract the contents of vosk-model-small-ru-0.22 into this folder (so you have am/final.mdl etc.):
+
+https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip
+
+Without this folder, offline voice recognition is skipped; press F for the fallback burst.
