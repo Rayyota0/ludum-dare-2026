@@ -28,6 +28,10 @@ namespace LudumDare.VoiceFog
         [Tooltip("Smooth normalized time before evaluating the restore curve.")]
         [SerializeField] bool smoothTimeline = true;
 
+        [Header("Signal sound")]
+        [SerializeField] float signalSoundVolume = 0.7f;
+        [SerializeField] float signalSoundFadeOutSeconds = 1f;
+
         [Header("Light pulse (fog bubble)")]
         [SerializeField] bool enableSpotPulse = true;
         [SerializeField] float spotPeakIntensity = 12f;
@@ -38,9 +42,12 @@ namespace LudumDare.VoiceFog
         KeywordSourceBehaviour[] _sources;
         IFogController _fog;
         Light _spot;
+        AudioSource _signalAudio;
         float _cooldownUntil;
         Coroutine _cycleRoutine;
         bool _cycleRunning;
+
+        const string SignalClipPath = "Audio/SFX/Fade Away";
 
         void Awake()
         {
@@ -51,6 +58,7 @@ namespace LudumDare.VoiceFog
 
             ResolveFogController();
             EnsureSpotLight();
+            BuildSignalAudio();
         }
 
         void OnValidate()
@@ -62,6 +70,27 @@ namespace LudumDare.VoiceFog
         {
             ResolveFogController();
             EnsureSpotLight();
+        }
+
+        void BuildSignalAudio()
+        {
+            if (_signalAudio != null) return;
+
+            var clip = Resources.Load<AudioClip>(SignalClipPath);
+            if (clip == null)
+            {
+                Debug.LogWarning($"[SignalFogBurst] Signal clip not found at Resources/{SignalClipPath}.");
+                return;
+            }
+
+            clip.LoadAudioData();
+
+            _signalAudio = gameObject.AddComponent<AudioSource>();
+            _signalAudio.clip = clip;
+            _signalAudio.loop = false;
+            _signalAudio.playOnAwake = false;
+            _signalAudio.volume = signalSoundVolume;
+            _signalAudio.spatialBlend = 0f;
         }
 
         /// <summary>Symmetric ease for 1→0 fog weight: avoids «ease-out on time» which clears most of the fog in the first part of the clip.</summary>
@@ -182,6 +211,13 @@ namespace LudumDare.VoiceFog
                 fadeRestore *= scale;
             }
 
+            // Play signal sound
+            if (_signalAudio != null && _signalAudio.clip != null)
+            {
+                _signalAudio.volume = signalSoundVolume;
+                _signalAudio.Play();
+            }
+
             if (fadeClearUseInspectorCurve)
                 yield return AnimateFogWeight(1f, 0f, fadeClear, fadeClearEase);
             else
@@ -189,6 +225,10 @@ namespace LudumDare.VoiceFog
 
             if (enableSpotPulse && _spot != null)
                 PulseSpot(spotPeakIntensity);
+
+            // Fade audio over hold + restore
+            float totalFadeTime = holdClear + fadeRestore;
+            StartCoroutine(FadeOutSignalAudio(totalFadeTime));
 
             var holdEnd = Time.unscaledTime + holdClear;
             while (Time.unscaledTime < holdEnd)
@@ -263,6 +303,26 @@ namespace LudumDare.VoiceFog
             }
 
             _fog.SetFogWeight(to);
+        }
+
+        IEnumerator FadeOutSignalAudio(float duration)
+        {
+            if (_signalAudio == null || !_signalAudio.isPlaying)
+                yield break;
+
+            float startVol = _signalAudio.volume;
+            float t = 0f;
+            duration = Mathf.Max(0.1f, duration);
+
+            while (t < duration && _signalAudio.isPlaying)
+            {
+                t += Time.unscaledDeltaTime;
+                _signalAudio.volume = Mathf.Lerp(startVol, 0f, t / duration);
+                yield return null;
+            }
+
+            _signalAudio.Stop();
+            _signalAudio.volume = signalSoundVolume;
         }
 
         void PulseSpot(float intensity)
