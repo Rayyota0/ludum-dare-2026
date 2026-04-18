@@ -1,11 +1,11 @@
 Model Information:
 * title:	Padlock
-* source:	https://sketchfab.com/3d-models/padlock-15da0ec38ef54a6ea9a62e444d1077b9
-* author:	wagnerlima07 (https://sketchfab.com/wagnerlima07)
+* source:	https://sketchfab.com/3d-models/padlock-c9f0cf0cbbe64ba49001d644244b1d16
+* author:	Nichgon (https://sketchfab.com/nichgon)
 
 Model License:
 * license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
 * requirements:	Author must be credited. Commercial use is allowed.
 
 If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
-This work is based on "Padlock" (https://sketchfab.com/3d-models/padlock-15da0ec38ef54a6ea9a62e444d1077b9) by wagnerlima07 (https://sketchfab.com/wagnerlima07) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+This work is based on "Padlock" (https://sketchfab.com/3d-models/padlock-c9f0cf0cbbe64ba49001d644244b1d16) by Nichgon (https://sketchfab.com/nichgon) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

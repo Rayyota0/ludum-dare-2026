@@ -29,12 +29,12 @@ ScriptedImporter:
     originalUri: Assets/Models/Lock/scene.bin
     assetPath: Assets/Models/Lock/scene.bin
   - type: 1
-    originalUri: Assets/Models/Lock/textures/padlock_baseColor.png
-    assetPath: Assets/Models/Lock/textures/padlock_baseColor.png
+    originalUri: Assets/Models/Lock/textures/material_baseColor.jpeg
+    assetPath: Assets/Models/Lock/textures/material_baseColor.jpeg
   - type: 1
-    originalUri: Assets/Models/Lock/textures/padlock_metallicRoughness.png
-    assetPath: Assets/Models/Lock/textures/padlock_metallicRoughness.png
+    originalUri: Assets/Models/Lock/textures/material_metallicRoughness.png
+    assetPath: Assets/Models/Lock/textures/material_metallicRoughness.png
   - type: 1
-    originalUri: Assets/Models/Lock/textures/padlock_normal.png
-    assetPath: Assets/Models/Lock/textures/padlock_normal.png
+    originalUri: Assets/Models/Lock/textures/material_normal.jpeg
+    assetPath: Assets/Models/Lock/textures/material_normal.jpeg
   reportItems: []
