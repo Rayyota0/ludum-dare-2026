@@ -49,7 +49,6 @@ namespace LudumDare.VoiceFog
             if (cameraTransform == null && Camera.main != null)
                 cameraTransform = Camera.main.transform;
 
-            _sources = GetComponents<KeywordSourceBehaviour>();
             ResolveFogController();
             EnsureSpotLight();
         }
@@ -119,6 +118,7 @@ namespace LudumDare.VoiceFog
         void OnEnable()
         {
             ResolveFogController();
+            _sources = GetComponents<KeywordSourceBehaviour>();
 
             foreach (var s in _sources)
                 s.OnKeywordSignal += HandleKeyword;
@@ -126,7 +126,7 @@ namespace LudumDare.VoiceFog
             if (_sources.Length == 0)
                 Debug.LogWarning("[SignalFogBurst] No KeywordSourceBehaviour found; add Vosk and/or keyboard fallback.");
             if (_fog == null)
-                Debug.LogWarning("[SignalFogBurst] No IFogController on this GameObject; add LegacyRenderSettingsFogDriver.");
+                Debug.LogWarning("[SignalFogBurst] No IFogController on this GameObject; add UniversalVolumeFogDriver.");
         }
 
         void OnDisable()

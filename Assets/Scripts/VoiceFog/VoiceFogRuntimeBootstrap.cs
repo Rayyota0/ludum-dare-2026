@@ -90,9 +90,10 @@ namespace LudumDare.VoiceFog
             {
                 if (cam.GetComponent<SignalFogBurst>() != null && cam.GetComponent<IFogController>() == null)
                 {
+                    if (cam.GetComponent<UniversalVolumeFogDriver>() == null)
+                        cam.gameObject.AddComponent<UniversalVolumeFogDriver>();
                     if (cam.GetComponent<DenseFogBootstrap>() == null)
                         cam.gameObject.AddComponent<DenseFogBootstrap>();
-                    cam.gameObject.AddComponent<LegacyRenderSettingsFogDriver>();
                 }
 
                 return;
@@ -102,9 +103,10 @@ namespace LudumDare.VoiceFog
             {
                 if (cam.GetComponent<IFogController>() == null)
                 {
+                    if (cam.GetComponent<UniversalVolumeFogDriver>() == null)
+                        cam.gameObject.AddComponent<UniversalVolumeFogDriver>();
                     if (cam.GetComponent<DenseFogBootstrap>() == null)
                         cam.gameObject.AddComponent<DenseFogBootstrap>();
-                    cam.gameObject.AddComponent<LegacyRenderSettingsFogDriver>();
                 }
 
                 if (cam.GetComponent<VoiceFogInstallMarker>() == null)
@@ -114,10 +116,14 @@ namespace LudumDare.VoiceFog
 
             try
             {
+                cam.gameObject.AddComponent<UniversalVolumeFogDriver>();
                 cam.gameObject.AddComponent<DenseFogBootstrap>();
-                cam.gameObject.AddComponent<LegacyRenderSettingsFogDriver>();
                 cam.gameObject.AddComponent<VoskSignalKeywordSource>();
                 cam.gameObject.AddComponent<SignalFogBurst>();
+#if UNITY_EDITOR
+                if (cam.GetComponent<KeyboardSignalFallback>() == null)
+                    cam.gameObject.AddComponent<KeyboardSignalFallback>();
+#endif
                 cam.gameObject.AddComponent<VoiceFogInstallMarker>();
                 Debug.Log($"[VoiceFog] Components added to \"{cam.name}\" (tag={cam.tag}).", cam);
             }

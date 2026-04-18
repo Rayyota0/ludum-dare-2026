@@ -19,6 +19,9 @@ namespace LudumDare.VoiceFog
         [SerializeField] int sampleRate = 16000;
         [SerializeField] [Range(128, 8192)] int chunkMaxSamples = 4096;
 
+        [Tooltip("Cap samples fed to Vosk per frame — large chunks + AcceptWaveform on the main thread freeze the editor.")]
+        [SerializeField] [Range(256, 4096)] int maxMicSamplesPerFrame = 1024;
+
         [Header("Logging")]
         [Tooltip("Log when Vosk output contains «сигнал» (final utterance).")]
         [SerializeField] bool logKeywordFinal = true;
@@ -120,6 +123,13 @@ namespace LudumDare.VoiceFog
             _model = null;
         }
 
+        void OnValidate()
+        {
+            maxMicSamplesPerFrame = Mathf.Clamp(maxMicSamplesPerFrame, 256, 4096);
+            if (maxMicSamplesPerFrame > chunkMaxSamples)
+                maxMicSamplesPerFrame = chunkMaxSamples;
+        }
+
         void Update()
         {
             if (!_ready || _recognizer == null)
@@ -139,7 +149,8 @@ namespace LudumDare.VoiceFog
             if (available < sampleRate / 50)
                 return;
 
-            int read = Mathf.Min(available, chunkMaxSamples);
+            var perFrameCap = Mathf.Min(chunkMaxSamples, maxMicSamplesPerFrame);
+            int read = Mathf.Min(available, perFrameCap);
             float[] data = new float[read];
             CopyClipSamplesWrapped(_clip, _lastMicSample, data);
             _lastMicSample = (_lastMicSample + read) % _clip.samples;

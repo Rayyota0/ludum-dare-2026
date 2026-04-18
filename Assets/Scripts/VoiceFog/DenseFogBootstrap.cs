@@ -14,13 +14,29 @@ namespace LudumDare.VoiceFog
 
         [Header("Linear fog — sharp distance cutoff, good for «wall» of whiteout")]
         [SerializeField] bool useLinearFog = true;
-        [SerializeField] float linearFogStart = 5f;
-        [SerializeField] float linearFogEnd = 18f;
+        [SerializeField] float linearFogStart = 0.5f;
+        [SerializeField] float linearFogEnd = 4.5f;
 
         public static float BaselineDensity { get; private set; }
 
         void Awake()
         {
+            BaselineDensity = fogDensity;
+
+            if (TryGetComponent<Camera>(out var cam))
+            {
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = fogColor;
+            }
+
+            var volumeDriver = GetComponent<UniversalVolumeFogDriver>();
+            if (volumeDriver != null)
+            {
+                var linearEnd = Mathf.Max(linearFogStart + 0.5f, linearFogEnd);
+                volumeDriver.IngestBaselineFromBootstrap(fogColor, useLinearFog, linearFogStart, linearEnd, fogDensity);
+                return;
+            }
+
             RenderSettings.fog = true;
             RenderSettings.fogColor = fogColor;
 
@@ -29,13 +45,11 @@ namespace LudumDare.VoiceFog
                 RenderSettings.fogMode = FogMode.Linear;
                 RenderSettings.fogStartDistance = linearFogStart;
                 RenderSettings.fogEndDistance = Mathf.Max(linearFogStart + 0.5f, linearFogEnd);
-                BaselineDensity = fogDensity;
             }
             else
             {
                 RenderSettings.fogMode = FogMode.ExponentialSquared;
                 RenderSettings.fogDensity = fogDensity;
-                BaselineDensity = fogDensity;
             }
         }
     }

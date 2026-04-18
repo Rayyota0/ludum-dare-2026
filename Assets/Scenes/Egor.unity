@@ -8223,6 +8223,7 @@ GameObject:
   - component: {fileID: 1483032902}
   - component: {fileID: 1483032903}
   - component: {fileID: 1483032904}
+  - component: {fileID: 1483032905}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -8306,8 +8307,8 @@ Camera:
   m_GameObject: {fileID: 1483032890}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.82, g: 0.82, b: 0.86, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -8363,8 +8364,8 @@ MonoBehaviour:
   fogColor: {r: 0.82, g: 0.82, b: 0.86, a: 1}
   fogDensity: 0.2
   useLinearFog: 1
-  linearFogStart: 5
-  linearFogEnd: 18
+  linearFogStart: 0.5
+  linearFogEnd: 4.5
 --- !u!114 &1483032901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8374,9 +8375,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1483032890}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7b3c9d2e5f1486092d8e1c4f7a0b3e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.LegacyRenderSettingsFogDriver
+  m_Script: {fileID: 11500000, guid: b8e4f2a1c9d0437e9f2a5b6c7d8e9f01, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.UniversalVolumeFogDriver
+  useLocalClearBandAtWeightZero: 1
+  localClearFogStartExtraAtWeightZero: 5
+  localClearFogEndExtraAtWeightZero: 5
 --- !u!114 &1483032902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8393,6 +8397,7 @@ MonoBehaviour:
   microphoneDevice: 
   sampleRate: 16000
   chunkMaxSamples: 4096
+  maxMicSamplesPerFrame: 1024
   logKeywordFinal: 1
   logKeywordPartial: 0
 --- !u!114 &1483032903
@@ -8429,6 +8434,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fcff6a5e3d67e3fc86d4d8582b38909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.VoiceFogInstallMarker
+--- !u!114 &1483032905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483032890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d08959c81b408481bbc157b6f94d4a94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LudumDare.VoiceFog.KeyboardSignalFallback
+  logTrigger: 1
 --- !u!1 &1499750591
 GameObject:
   m_ObjectHideFlags: 0
