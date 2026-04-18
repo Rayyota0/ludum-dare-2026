@@ -96,6 +96,9 @@ namespace LudumDare.VoiceFog
                         cam.gameObject.AddComponent<DenseFogBootstrap>();
                 }
 
+                if (cam.GetComponent<FogDamageController>() == null)
+                    cam.gameObject.AddComponent<FogDamageController>();
+
                 return;
             }
 
@@ -108,6 +111,9 @@ namespace LudumDare.VoiceFog
                     if (cam.GetComponent<DenseFogBootstrap>() == null)
                         cam.gameObject.AddComponent<DenseFogBootstrap>();
                 }
+
+                if (cam.GetComponent<FogDamageController>() == null)
+                    cam.gameObject.AddComponent<FogDamageController>();
 
                 if (cam.GetComponent<VoiceFogInstallMarker>() == null)
                     cam.gameObject.AddComponent<VoiceFogInstallMarker>();
@@ -124,6 +130,7 @@ namespace LudumDare.VoiceFog
                     cam.gameObject.AddComponent<KeyboardSignalFallback>();
 #endif
                 cam.gameObject.AddComponent<SignalFogBurst>();
+                cam.gameObject.AddComponent<FogDamageController>();
                 cam.gameObject.AddComponent<VoiceFogInstallMarker>();
                 Debug.Log($"[VoiceFog] Components added to \"{cam.name}\" (tag={cam.tag}).", cam);
             }
