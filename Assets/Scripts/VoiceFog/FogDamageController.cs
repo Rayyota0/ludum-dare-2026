@@ -33,6 +33,9 @@ namespace LudumDare.VoiceFog
         [SerializeField] float maxShakeAngle = 3f;
         [SerializeField] float shakeSpeed = 25f;
 
+        [Header("Audio")]
+        [SerializeField] float maxHissVolume = 0.8f;
+
         [Header("Game Over")]
         [SerializeField] float gameOverFadeSeconds = 1.5f;
         [SerializeField] float restartDelaySeconds = 3f;
@@ -51,8 +54,10 @@ namespace LudumDare.VoiceFog
         CanvasGroup _gameOverGroup;
         Text _gameOverText;
         Texture2D _noiseTex;
+        AudioSource _hissSource;
 
         const int NoiseSize = 128;
+        const string HissClipPath = "Audio/SFX/white-noise-hiss";
 
         void Awake()
         {
@@ -67,6 +72,7 @@ namespace LudumDare.VoiceFog
 
             BuildUI();
             GenerateNoiseTexture();
+            BuildHissAudio();
         }
 
         void Update()
@@ -85,6 +91,7 @@ namespace LudumDare.VoiceFog
             ApplyVignette(t);
             ApplyNoise(t);
             ApplyTint(t);
+            ApplyHiss(t);
         }
 
         void LateUpdate()
@@ -172,6 +179,35 @@ namespace LudumDare.VoiceFog
             float rz = Mathf.PerlinNoise(time, time) * 2f - 1f;
 
             _cameraTransform.localRotation *= Quaternion.Euler(rx * angle, ry * angle * 0.5f, rz * angle * 0.3f);
+        }
+
+        void ApplyHiss(float t)
+        {
+            if (_hissSource == null) return;
+
+            _hissSource.volume = Mathf.Lerp(0f, maxHissVolume, t);
+
+            if (t > 0.01f && !_hissSource.isPlaying)
+                _hissSource.Play();
+            else if (t <= 0.01f && _hissSource.isPlaying)
+                _hissSource.Stop();
+        }
+
+        void BuildHissAudio()
+        {
+            var clip = Resources.Load<AudioClip>(HissClipPath);
+            if (clip == null)
+            {
+                Debug.LogWarning($"[FogDamage] Hiss clip not found at Resources/{HissClipPath}. Move white-noise-hiss.wav to Assets/Resources/Audio/SFX/.");
+                return;
+            }
+
+            _hissSource = gameObject.AddComponent<AudioSource>();
+            _hissSource.clip = clip;
+            _hissSource.loop = true;
+            _hissSource.playOnAwake = false;
+            _hissSource.volume = 0f;
+            _hissSource.spatialBlend = 0f;
         }
 
         #endregion

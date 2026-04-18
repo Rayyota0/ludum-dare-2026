@@ -8,14 +8,14 @@ namespace LudumDare.VoiceFog
     [DefaultExecutionOrder(-100)]
     public sealed class DenseFogBootstrap : MonoBehaviour
     {
-        [SerializeField] Color fogColor = new Color(0.82f, 0.82f, 0.86f);
+        [SerializeField] Color fogColor = new Color(0.28f, 0.30f, 0.34f);
         [Header("Exponential fog (when Use linear fog is off)")]
-        [SerializeField] [Range(0.001f, 0.35f)] float fogDensity = 0.2f;
+        [SerializeField] [Range(0.001f, 0.35f)] float fogDensity = 0.12f;
 
         [Header("Linear fog — sharp distance cutoff, good for «wall» of whiteout")]
-        [SerializeField] bool useLinearFog = true;
-        [SerializeField] float linearFogStart = 0.5f;
-        [SerializeField] float linearFogEnd = 4.5f;
+        [SerializeField] bool useLinearFog = false;
+        [SerializeField] float linearFogStart = 1f;
+        [SerializeField] float linearFogEnd = 12f;
 
         public static float BaselineDensity { get; private set; }
 

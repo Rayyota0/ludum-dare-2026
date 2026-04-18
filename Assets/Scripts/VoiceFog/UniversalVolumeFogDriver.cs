@@ -35,7 +35,7 @@ namespace LudumDare.VoiceFog
 
         [Header("Partial fog (clip weight range)")]
         [Tooltip("Gameplay weight 0 is remapped here (0 = as open as the rest of the driver allows, 1 = baseline dense). E.g. 0.3 = always keep ~30 % of the «dense» look even on signal.")]
-        [SerializeField] [Range(0f, 1f)] float fogWeightWhenInputZero;
+        [SerializeField] [Range(0f, 1f)] float fogWeightWhenInputZero = 0.3f;
 
         [Tooltip("Gameplay weight 1 maps here (usually 1 = full baseline). Lower to never reach full wall fog.")]
         [SerializeField] [Range(0f, 1f)] float fogWeightWhenInputOne = 1f;
@@ -48,10 +48,10 @@ namespace LudumDare.VoiceFog
         [SerializeField] bool useLocalClearBandAtWeightZero = true;
 
         [Tooltip("At fog weight 0 (linear): added to baseline fogStartDistance so the no-fog region extends this many meters farther from the camera.")]
-        [SerializeField] float localClearFogStartExtraAtWeightZero = 5f;
+        [SerializeField] float localClearFogStartExtraAtWeightZero = 8f;
 
         [Tooltip("At fog weight 0 (linear): added to baseline fogEndDistance so the full-fog distance moves outward with the ramp (keep ≥ 0).")]
-        [SerializeField] float localClearFogEndExtraAtWeightZero = 5f;
+        [SerializeField] float localClearFogEndExtraAtWeightZero = 6f;
 
         [Tooltip("If on, weight 0 pushes linear fog to very far distances (almost no fog). If off, only the start of the fog ramp moves outward; ramp width (end−start) stays as in the scene baseline, so haze does not vanish.")]
         [SerializeField] bool useFullVisualClearAtWeightZero;
@@ -61,7 +61,7 @@ namespace LudumDare.VoiceFog
 
         [Header("Clear at weight 0 (exponential fog)")]
         [Tooltip("When «full clear» is off: density at weight 0 (still visible haze). Local clear band applies only to linear fog — exponential fog cannot carve a fixed-radius near-camera hole; use linear fog on DenseFogBootstrap for that.")]
-        [SerializeField] [Range(0.0002f, 0.08f)] float relaxedFogDensity = 0.006f;
+        [SerializeField] [Range(0.0002f, 0.08f)] float relaxedFogDensity = 0.03f;
 
         [Header("Volume (placeholder for future URP Fog override)")]
         [Tooltip("Keeps a global Volume above scene defaults without adding overrides, so a Fog volume component can be wired later without reordering.")]

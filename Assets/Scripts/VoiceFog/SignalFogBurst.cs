@@ -28,12 +28,12 @@ namespace LudumDare.VoiceFog
         [Tooltip("Smooth normalized time before evaluating the restore curve.")]
         [SerializeField] bool smoothTimeline = true;
 
-        [Header("Spot pulse (optional cue)")]
-        [SerializeField] bool enableSpotPulse;
-        [SerializeField] float spotPeakIntensity = 8f;
-        [SerializeField] float spotRange = 35f;
+        [Header("Light pulse (fog bubble)")]
+        [SerializeField] bool enableSpotPulse = true;
+        [SerializeField] float spotPeakIntensity = 12f;
+        [SerializeField] float spotRange = 20f;
         [SerializeField] float spotSpotAngle = 55f;
-        [SerializeField] Color spotColor = new Color(0.85f, 0.92f, 1f);
+        [SerializeField] Color spotColor = new Color(0.75f, 0.85f, 1f);
 
         KeywordSourceBehaviour[] _sources;
         IFogController _fog;
@@ -102,16 +102,15 @@ namespace LudumDare.VoiceFog
             if (!enableSpotPulse || _spot != null)
                 return;
 
-            var lightGo = new GameObject("SignalBurstSpot");
+            var lightGo = new GameObject("SignalBurstLight");
             lightGo.transform.SetParent(cameraTransform != null ? cameraTransform : transform, false);
             lightGo.transform.localPosition = Vector3.zero;
             lightGo.transform.localRotation = Quaternion.identity;
             _spot = lightGo.AddComponent<Light>();
-            _spot.type = LightType.Spot;
+            _spot.type = LightType.Point;
             _spot.enabled = false;
-            _spot.shadows = LightShadows.None;
+            _spot.shadows = LightShadows.Soft;
             _spot.range = spotRange;
-            _spot.spotAngle = spotSpotAngle;
             _spot.color = spotColor;
         }
 
