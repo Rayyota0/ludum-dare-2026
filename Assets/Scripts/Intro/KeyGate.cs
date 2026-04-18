@@ -18,6 +18,9 @@ namespace LudumDare.Intro
         [Tooltip("Distance to interact")]
         public float interactDistance = 3f;
 
+        [Tooltip("Lock model to destroy when gate opens")]
+        public GameObject lockObject;
+
         bool _opened;
         bool _keyCollected;
 
@@ -51,6 +54,9 @@ namespace LudumDare.Intro
         void Open()
         {
             _opened = true;
+            // Destroy lock
+            if (lockObject != null)
+                Destroy(lockObject);
             // Slide gate up to open
             StartCoroutine(OpenAnimation());
         }
