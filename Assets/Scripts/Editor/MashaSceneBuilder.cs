@@ -587,67 +587,94 @@ namespace LudumDare.Editor
                 "Assets/Materials/SH_Rust.mat", li);
         }
 
+        [MenuItem("Tools/Build Main Gate")]
+        public static void RebuildMainGate()
+        {
+            var old = GameObject.Find("--- LOCKED GATE ---");
+            if (old != null) Undo.DestroyObjectImmediate(old);
+            CreateLockedGate();
+            Debug.Log("[MashaSceneBuilder] Main gate rebuilt!");
+        }
+
         static void CreateLockedGate()
         {
-            // Locked fence/gate across the main road at z=38
             var gateParent = new GameObject("--- LOCKED GATE ---");
             gateParent.transform.position = Vector3.zero;
             Undo.RegisterCreatedObjectUndo(gateParent, "Create Locked Gate");
             var gp = gateParent.transform;
 
-            string gateMat = "Assets/Materials/SH_GateMetal.mat";
             string metalMat = "Assets/Materials/SH_Metal.mat";
+            string gateMat = "Assets/Materials/SH_GateMetal.mat";
+            float z = 45f;
 
-            // Left fence section (from left building to gate)
-            CreatePrimitive("GateFence_Left", PrimitiveType.Cube,
-                new Vector3(-4.5f, 1.2f, 38), new Vector3(4, 2.4f, 0.15f),
-                gateMat, gp);
+            // GateDoor — parent for the opening part (prism bars)
+            var doorParent = new GameObject("GateDoor");
+            doorParent.transform.position = new Vector3(0, 0, z);
+            doorParent.transform.SetParent(gp, true);
+            // Add a box collider to block player
+            var doorCol = doorParent.AddComponent<BoxCollider>();
+            doorCol.center = new Vector3(0, 1.4f, 0);
+            doorCol.size = new Vector3(14, 2.8f, 0.3f);
+            Undo.RegisterCreatedObjectUndo(doorParent, "Create GateDoor");
+            var dp = doorParent.transform;
 
-            // Right fence section (from gate to right building)
-            CreatePrimitive("GateFence_Right", PrimitiveType.Cube,
-                new Vector3(4.5f, 1.2f, 38), new Vector3(4, 2.4f, 0.15f),
-                gateMat, gp);
+            // Left post
+            CreatePrimitive("MainGatePost_L", PrimitiveType.Cylinder,
+                new Vector3(-7, 1.4f, z), new Vector3(0.14f, 1.4f, 0.14f),
+                metalMat, dp);
+            // Right post
+            CreatePrimitive("MainGatePost_R", PrimitiveType.Cylinder,
+                new Vector3(7, 1.4f, z), new Vector3(0.14f, 1.4f, 0.14f),
+                metalMat, dp);
 
-            // Gate door (the part that opens - centered, 2.5m wide)
-            var gateDoor = CreatePrimitive("GateDoor", PrimitiveType.Cube,
-                new Vector3(0, 1.2f, 38), new Vector3(2.5f, 2.4f, 0.1f),
-                gateMat, gp);
+            // Top bar
+            CreatePrimitive("MainGateTopBar", PrimitiveType.Cylinder,
+                new Vector3(0, 2.8f, z), new Vector3(0.08f, 7f, 0.08f),
+                Quaternion.Euler(0, 0, 90), metalMat, dp);
 
-            // Gate posts
-            CreatePrimitive("GatePost_Left", PrimitiveType.Cylinder,
-                new Vector3(-1.25f, 1.3f, 38), new Vector3(0.15f, 1.3f, 0.15f),
-                metalMat, gp);
-            CreatePrimitive("GatePost_Right", PrimitiveType.Cylinder,
-                new Vector3(1.25f, 1.3f, 38), new Vector3(0.15f, 1.3f, 0.15f),
-                metalMat, gp);
-
-            // Lock (visible on gate)
-            CreatePrimitive("GateLock", PrimitiveType.Cube,
-                new Vector3(0, 1.0f, 37.9f), new Vector3(0.15f, 0.12f, 0.08f),
-                metalMat, gp);
-
-            // Fence bars on the gate (vertical lines to look like a real gate)
-            for (int i = -4; i <= 4; i++)
+            // Vertical bars across full width
+            for (int i = -12; i <= 12; i++)
             {
-                CreatePrimitive($"GateBar_{i + 4}", PrimitiveType.Cylinder,
-                    new Vector3(i * 0.25f, 1.2f, 38), new Vector3(0.04f, 1.2f, 0.04f),
-                    metalMat, gp);
+                float x = i * 0.55f;
+                CreatePrimitive($"MainBar_{i + 12}", PrimitiveType.Cylinder,
+                    new Vector3(x, 1.3f, z), new Vector3(0.04f, 1.3f, 0.04f),
+                    gateMat, dp);
             }
 
-            // Sign: keep out (small board)
-            CreatePrimitive("GateSign", PrimitiveType.Cube,
-                new Vector3(0, 2.2f, 37.9f), new Vector3(1.0f, 0.3f, 0.05f),
-                "Assets/Materials/SH_Wood.mat", gp);
+            // Horizontal crossbars
+            CreatePrimitive("MainCross_Low", PrimitiveType.Cylinder,
+                new Vector3(0, 0.5f, z), new Vector3(0.05f, 7f, 0.05f),
+                Quaternion.Euler(0, 0, 90), gateMat, dp);
+            CreatePrimitive("MainCross_Mid", PrimitiveType.Cylinder,
+                new Vector3(0, 1.5f, z), new Vector3(0.05f, 7f, 0.05f),
+                Quaternion.Euler(0, 0, 90), gateMat, dp);
 
-            // Dim red light on gate
+            // Spikes on top
+            for (int i = -12; i <= 12; i++)
+            {
+                float x = i * 0.55f;
+                CreatePrimitive($"MainSpike_{i + 12}", PrimitiveType.Sphere,
+                    new Vector3(x, 2.65f, z), new Vector3(0.07f, 0.12f, 0.07f),
+                    metalMat, dp);
+            }
+
+            // Post caps
+            CreatePrimitive("MainPostCap_L", PrimitiveType.Sphere,
+                new Vector3(-7, 2.85f, z), new Vector3(0.22f, 0.22f, 0.22f),
+                metalMat, dp);
+            CreatePrimitive("MainPostCap_R", PrimitiveType.Sphere,
+                new Vector3(7, 2.85f, z), new Vector3(0.22f, 0.22f, 0.22f),
+                metalMat, dp);
+
+            // Red light
             var gateLight = new GameObject("Gate_Light");
-            gateLight.transform.position = new Vector3(0, 2.8f, 37.5f);
+            gateLight.transform.position = new Vector3(0, 3.2f, z - 0.5f);
             gateLight.transform.SetParent(gp, true);
             var gl = gateLight.AddComponent<Light>();
             gl.type = LightType.Point;
             gl.color = new Color(0.8f, 0.2f, 0.1f);
-            gl.intensity = 0.5f;
-            gl.range = 6;
+            gl.intensity = 3f;
+            gl.range = 10;
             Undo.RegisterCreatedObjectUndo(gateLight, "Create Gate Light");
         }
 
