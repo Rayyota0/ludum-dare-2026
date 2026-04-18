@@ -119,11 +119,11 @@ namespace LudumDare.VoiceFog
                 cam.gameObject.AddComponent<UniversalVolumeFogDriver>();
                 cam.gameObject.AddComponent<DenseFogBootstrap>();
                 cam.gameObject.AddComponent<VoskSignalKeywordSource>();
-                cam.gameObject.AddComponent<SignalFogBurst>();
 #if UNITY_EDITOR
                 if (cam.GetComponent<KeyboardSignalFallback>() == null)
                     cam.gameObject.AddComponent<KeyboardSignalFallback>();
 #endif
+                cam.gameObject.AddComponent<SignalFogBurst>();
                 cam.gameObject.AddComponent<VoiceFogInstallMarker>();
                 Debug.Log($"[VoiceFog] Components added to \"{cam.name}\" (tag={cam.tag}).", cam);
             }

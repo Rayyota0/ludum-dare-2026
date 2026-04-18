@@ -1,0 +1,11 @@
+Model Information:
+* title:	Corpse in a black body bag with ropes
+* source:	https://sketchfab.com/3d-models/corpse-in-a-black-body-bag-with-ropes-fb2fe10ba9b14982b5785d73d7155daa
+* author:	Dennis Hafemann (https://sketchfab.com/dennis.hafemann)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Corpse in a black body bag with ropes" (https://sketchfab.com/3d-models/corpse-in-a-black-body-bag-with-ropes-fb2fe10ba9b14982b5785d73d7155daa) by Dennis Hafemann (https://sketchfab.com/dennis.hafemann) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
