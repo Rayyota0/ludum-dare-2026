@@ -6,6 +6,7 @@ namespace LudumDare.VoiceFog
     /// </summary>
     public interface IFogController
     {
+        float FogWeight { get; }
         void SetFogWeight(float weight01);
     }
 }

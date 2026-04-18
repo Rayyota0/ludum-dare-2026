@@ -22,6 +22,8 @@ namespace LudumDare.VoiceFog
 
         float _authoritativeWeight = 1f;
 
+        public float FogWeight => _authoritativeWeight;
+
         Camera _camera;
         Volume _voiceFogVolume;
 
