@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LudumDare.Intro
 {
@@ -89,7 +90,7 @@ namespace LudumDare.Intro
                 if (promptUI != null)
                     promptUI.SetActive(_inRange);
 
-                if (_inRange && Input.GetKeyDown(KeyCode.E))
+                if (_inRange && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
                 {
                     PickUp();
                 }

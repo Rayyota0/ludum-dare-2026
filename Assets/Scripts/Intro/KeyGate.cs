@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LudumDare.Intro
 {
@@ -39,7 +40,7 @@ namespace LudumDare.Intro
             if (playerTransform != null)
             {
                 float dist = Vector3.Distance(playerTransform.position, transform.position);
-                if (dist < interactDistance && Input.GetKeyDown(KeyCode.E))
+                if (dist < interactDistance && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
                 {
                     if (_keyCollected)
                         Open();

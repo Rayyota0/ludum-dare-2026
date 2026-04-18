@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LudumDare.Intro
 {
@@ -19,7 +20,7 @@ namespace LudumDare.Intro
             if (playerTransform == null) return;
 
             float dist = Vector3.Distance(playerTransform.position, transform.position);
-            if (dist < pickupDistance && Input.GetKeyDown(KeyCode.E))
+            if (dist < pickupDistance && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
             {
                 _collected = true;
                 gameObject.SetActive(false);
