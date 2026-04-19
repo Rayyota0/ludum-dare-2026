@@ -173,10 +173,10 @@ namespace LudumDare.VoiceFog
 
         void LateUpdate()
         {
-            if (GraphicsSettings.defaultRenderPipeline != null)
-                return;
             if (!_captured)
                 return;
+            // URP: beginCameraRendering should push each frame, but in some player builds timing can skip a frame;
+            // repeating here keeps distance fog reliable (matches editor look on Artem / egor-interface).
             PushToRenderSettings();
         }
 

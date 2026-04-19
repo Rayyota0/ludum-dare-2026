@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 namespace LudumDare.VoiceFog
@@ -75,6 +76,15 @@ namespace LudumDare.VoiceFog
                 cam.gameObject.AddComponent<KeyboardSignalFallback>();
         }
 
+        /// <summary>
+        /// GroundFog particles use URP Lit with soft particles; without a camera depth texture they can vanish in standalone.
+        /// </summary>
+        static void EnsureMainCameraDepthTexture(Camera cam)
+        {
+            if (cam.TryGetComponent(out UniversalAdditionalCameraData uacd))
+                uacd.requiresDepthTexture = true;
+        }
+
         static void TryInstall(Camera cam)
         {
             if (cam == null)
@@ -106,6 +116,7 @@ namespace LudumDare.VoiceFog
                     cam.gameObject.AddComponent<FogDamageController>();
 
                 EnsureKeyboardFallback(cam);
+                EnsureMainCameraDepthTexture(cam);
                 return;
             }
 
@@ -126,6 +137,7 @@ namespace LudumDare.VoiceFog
                     cam.gameObject.AddComponent<VoiceFogInstallMarker>();
 
                 EnsureKeyboardFallback(cam);
+                EnsureMainCameraDepthTexture(cam);
                 return;
             }
 
@@ -138,6 +150,7 @@ namespace LudumDare.VoiceFog
                 cam.gameObject.AddComponent<SignalFogBurst>();
                 cam.gameObject.AddComponent<FogDamageController>();
                 cam.gameObject.AddComponent<VoiceFogInstallMarker>();
+                EnsureMainCameraDepthTexture(cam);
                 Debug.Log($"[VoiceFog] Components added to \"{cam.name}\" (tag={cam.tag}).", cam);
             }
             catch (System.Exception e)
