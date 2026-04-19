@@ -1,6 +1,6 @@
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Reflection;
 
 namespace LudumDare.UI
 {
@@ -39,27 +39,26 @@ namespace LudumDare.UI
         void CreateUI()
         {
             var canvasGO = new GameObject("FogCooldownCanvas");
-            canvasGO.transform.SetParent(transform);
+            canvasGO.transform.SetParent(transform, false);
             var canvas = canvasGO.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100;
-            canvasGO.AddComponent<CanvasScaler>();
+            UiOverlayLayout.ConfigureOverlayScaler(canvasGO.AddComponent<CanvasScaler>());
 
-            // Bar background
+            // Bar background — width/height/margins as fractions of reference resolution
             var bgGO = new GameObject("BarBG");
-            bgGO.transform.SetParent(canvasGO.transform);
+            bgGO.transform.SetParent(canvasGO.transform, false);
             _bgImage = bgGO.AddComponent<Image>();
             _bgImage.color = barBgColor;
             var bgRect = bgGO.GetComponent<RectTransform>();
-            bgRect.anchorMin = new Vector2(0.5f, 0);
-            bgRect.anchorMax = new Vector2(0.5f, 0);
-            bgRect.pivot = new Vector2(0.5f, 0);
-            bgRect.anchoredPosition = new Vector2(0, 30);
-            bgRect.sizeDelta = new Vector2(200, 12);
+            const float barW = 200f / UiOverlayLayout.ReferenceWidth;
+            const float barH = 12f / UiOverlayLayout.ReferenceHeight;
+            const float bottomM = 30f / UiOverlayLayout.ReferenceHeight;
+            UiOverlayLayout.SetBottomCenterBar(bgRect, barW, barH, bottomM);
 
             // Fill bar
             var fillGO = new GameObject("BarFill");
-            fillGO.transform.SetParent(bgGO.transform);
+            fillGO.transform.SetParent(bgGO.transform, false);
             _fillImage = fillGO.AddComponent<Image>();
             _fillImage.color = barFillColor;
             var fillRect = fillGO.GetComponent<RectTransform>();

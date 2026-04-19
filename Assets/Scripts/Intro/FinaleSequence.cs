@@ -1,6 +1,7 @@
 using System.Collections;
 using LudumDare.Pickup;
 using LudumDare.Player;
+using LudumDare.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -687,12 +688,12 @@ namespace LudumDare.Intro
             _canvas = go.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 200;
-            go.AddComponent<CanvasScaler>();
+            UiOverlayLayout.ConfigureOverlayScaler(go.AddComponent<CanvasScaler>());
 
             var fadeHolder = new GameObject("FadeHolder");
             fadeHolder.transform.SetParent(go.transform, false);
             var fadeHolderRT = fadeHolder.AddComponent<RectTransform>();
-            Stretch(fadeHolderRT);
+            UiOverlayLayout.StretchToParent(fadeHolderRT);
             _fadeGroup = fadeHolder.AddComponent<CanvasGroup>();
             _fadeGroup.alpha = 0;
             _fadeGroup.blocksRaycasts = false;
@@ -701,13 +702,13 @@ namespace LudumDare.Intro
             _fadeImage.transform.SetParent(fadeHolder.transform, false);
             _fadeImage.color = Color.black;
             _fadeImage.raycastTarget = false;
-            Stretch(_fadeImage.rectTransform);
+            UiOverlayLayout.StretchToParent(_fadeImage.rectTransform);
 
             _flashImage = new GameObject("Flash").AddComponent<Image>();
             _flashImage.transform.SetParent(go.transform, false);
             _flashImage.color = new Color(0.5f, 0, 0, 0);
             _flashImage.raycastTarget = false;
-            Stretch(_flashImage.rectTransform);
+            UiOverlayLayout.StretchToParent(_flashImage.rectTransform);
 
             _promptText = new GameObject("Prompt").AddComponent<Text>();
             _promptText.transform.SetParent(go.transform, false);
@@ -719,9 +720,7 @@ namespace LudumDare.Intro
             ol.effectColor = new Color(0, 0, 0, 0.4f);
             ol.effectDistance = new Vector2(1, -1);
             var prt = _promptText.rectTransform;
-            prt.anchorMin = new Vector2(0.5f, 0.18f);
-            prt.anchorMax = new Vector2(0.5f, 0.18f);
-            prt.sizeDelta = new Vector2(400, 40);
+            UiOverlayLayout.SetNormalizedBand(prt, 0.15f, 0.85f, 0.12f, 0.22f);
             _promptText.gameObject.SetActive(false);
 
             _endText = new GameObject("End").AddComponent<Text>();
@@ -735,9 +734,7 @@ namespace LudumDare.Intro
             eol.effectColor = new Color(0, 0, 0, 0.8f);
             eol.effectDistance = new Vector2(2, -2);
             var ert = _endText.rectTransform;
-            ert.anchorMin = new Vector2(0.5f, 0.5f);
-            ert.anchorMax = new Vector2(0.5f, 0.5f);
-            ert.sizeDelta = new Vector2(400, 80);
+            UiOverlayLayout.SetNormalizedBand(ert, 0.15f, 0.85f, 0.38f, 0.62f);
             _endText.gameObject.SetActive(false);
         }
 
@@ -831,11 +828,5 @@ namespace LudumDare.Intro
             r.material = m;
         }
 
-        static void Stretch(RectTransform rt)
-        {
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-        }
     }
 }

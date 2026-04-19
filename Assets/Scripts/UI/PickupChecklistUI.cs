@@ -33,9 +33,28 @@ namespace LudumDare.UI
 
             if (rowParent == null)
                 BuildCanvas();
+            else
+                ApplyChecklistPanelLayout(rowParent);
+
+            var canvas = rowParent != null ? rowParent.GetComponentInParent<Canvas>() : null;
+            if (canvas != null)
+            {
+                var scaler = canvas.GetComponent<CanvasScaler>();
+                if (scaler != null)
+                    UiOverlayLayout.ConfigureOverlayScaler(scaler);
+            }
 
             EnsureVerticalLayout();
             BuildRows();
+        }
+
+        static void ApplyChecklistPanelLayout(RectTransform panelRt)
+        {
+            const float marginX = 12f / UiOverlayLayout.ReferenceWidth;
+            const float marginY = 12f / UiOverlayLayout.ReferenceHeight;
+            const float panelW = 200f / UiOverlayLayout.ReferenceWidth;
+            const float panelH = 80f / UiOverlayLayout.ReferenceHeight;
+            UiOverlayLayout.SetTopLeftPanelFractions(panelRt, marginX, marginY, panelW, panelH);
         }
 
         void BuildCanvas()
@@ -44,7 +63,7 @@ namespace LudumDare.UI
             var canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 40;
-            canvasGo.AddComponent<CanvasScaler>();
+            UiOverlayLayout.ConfigureOverlayScaler(canvasGo.AddComponent<CanvasScaler>());
             var cg = canvasGo.AddComponent<CanvasGroup>();
             cg.blocksRaycasts = false;
             cg.interactable = false;
@@ -52,11 +71,7 @@ namespace LudumDare.UI
             var panelGo = new GameObject("ChecklistPanel");
             panelGo.transform.SetParent(canvasGo.transform, false);
             var panelRt = panelGo.AddComponent<RectTransform>();
-            panelRt.anchorMin = new Vector2(0f, 1f);
-            panelRt.anchorMax = new Vector2(0f, 1f);
-            panelRt.pivot = new Vector2(0f, 1f);
-            panelRt.anchoredPosition = new Vector2(12f, -12f);
-            panelRt.sizeDelta = new Vector2(200f, 80f);
+            ApplyChecklistPanelLayout(panelRt);
 
             rowParent = panelRt;
         }
@@ -68,7 +83,8 @@ namespace LudumDare.UI
 
             var v = rowParent.gameObject.AddComponent<VerticalLayoutGroup>();
             v.spacing = 2f;
-            v.padding = new RectOffset(4, 4, 4, 4);
+            var pad = UiOverlayLayout.PaddingFromRefWidth();
+            v.padding = new RectOffset(pad, pad, pad, pad);
             v.childControlWidth = true;
             v.childControlHeight = true;
             v.childForceExpandWidth = true;

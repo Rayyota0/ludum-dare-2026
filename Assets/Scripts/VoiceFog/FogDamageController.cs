@@ -1,4 +1,5 @@
 using System.Collections;
+using LudumDare.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -261,9 +262,7 @@ namespace LudumDare.VoiceFog
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 999;
 
-            var scaler = go.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            UiOverlayLayout.ConfigureOverlayScaler(go.AddComponent<CanvasScaler>());
 
             go.AddComponent<GraphicRaycaster>();
 

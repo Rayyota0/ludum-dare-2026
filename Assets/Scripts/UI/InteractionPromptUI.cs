@@ -32,7 +32,7 @@ namespace LudumDare.UI
             _canvas = go.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 50;
-            go.AddComponent<CanvasScaler>();
+            UiOverlayLayout.ConfigureOverlayScaler(go.AddComponent<CanvasScaler>());
 
             _group = go.AddComponent<CanvasGroup>();
             _group.alpha = 0f;
@@ -53,10 +53,7 @@ namespace LudumDare.UI
             outline.effectDistance = new Vector2(1.5f, -1.5f);
 
             var rt = _text.rectTransform;
-            rt.anchorMin = new Vector2(0.5f, 0.3f);
-            rt.anchorMax = new Vector2(0.5f, 0.3f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(600, 50);
+            UiOverlayLayout.SetNormalizedBand(rt, 0.05f, 0.95f, 0.26f, 0.34f);
         }
 
         void Update()
