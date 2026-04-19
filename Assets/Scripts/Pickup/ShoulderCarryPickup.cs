@@ -1,3 +1,4 @@
+using LudumDare.Intro;
 using UnityEngine;
 
 namespace LudumDare.Pickup
@@ -6,14 +7,17 @@ namespace LudumDare.Pickup
     /// <see cref="IPickupable"/> that, after pickup, follows the camera with a shoulder-style offset
     /// (typically lower-left of the view). Colliders are disabled so the carry mesh does not block raycasts.
     /// </summary>
-    public sealed class ShoulderCarryPickup : MonoBehaviour, IPickupable
+    public sealed class ShoulderCarryPickup : MonoBehaviour, IPickupable, IBodyFinaleCarry
     {
         [SerializeField] Transform cameraTransform;
-        [Tooltip("Camera-local offset: more negative X/Y = lower-left; larger Z = farther from lens (smaller on screen).")]
-        [SerializeField] Vector3 offsetLocal = new Vector3(-0.55f, -0.52f, 1.05f);
-        [SerializeField] Vector3 tiltEuler = new Vector3(0f, 22f, -18f);
+        [Tooltip("Camera-local offset: more negative X/Y = lower-left; keep Z ~0.78–1.1 to stay in front of the near plane.")]
+        [SerializeField] Vector3 offsetLocal = new Vector3(-0.76f, -0.62f, 0.82f);
+        [Tooltip("Extra rotation in camera-local axes: stronger negative Y/Z helps tuck the torso off-screen and aim the head toward the top-left of the view.")]
+        [SerializeField] Vector3 tiltEuler = new Vector3(32f, -58f, -62f);
         [Tooltip("Uniform scale applied when picked up (relative to scale on the ground).")]
-        [SerializeField] float carryScaleMultiplier = 0.35f;
+        [SerializeField] float carryScaleMultiplier = 0.5f;
+        [Tooltip("After tilt, shifts position in tilted local axes (slide along bag length to hide torso in corner).")]
+        [SerializeField] Vector3 carryPivotOffsetLocal = new Vector3(0.26f, 0.08f, -0.05f);
         [SerializeField] bool usePickupLerp = true;
         [SerializeField] float lerpSpeed = 3f;
         [SerializeField] string itemId;
@@ -42,8 +46,8 @@ namespace LudumDare.Pickup
             if (!_carried || _cam == null)
                 return;
 
-            var targetPos = _cam.TransformPoint(offsetLocal);
             var targetRot = _cam.rotation * Quaternion.Euler(tiltEuler);
+            var targetPos = _cam.TransformPoint(offsetLocal) + targetRot * carryPivotOffsetLocal;
             var targetScale = _groundScale * Mathf.Max(0.01f, carryScaleMultiplier);
 
             if (usePickupLerp && _lerpT < 1f)
@@ -98,6 +102,17 @@ namespace LudumDare.Pickup
 
             if (registerCollected && Registry != null && !string.IsNullOrEmpty(itemId))
                 Registry.MarkCollected(itemId);
+        }
+
+        public bool IsCarriedForFinale => _carried;
+
+        public Transform BodyTransform => transform;
+
+        public void DetachForFinale()
+        {
+            _carried = false;
+            transform.localScale = _groundScale;
+            enabled = false;
         }
     }
 }

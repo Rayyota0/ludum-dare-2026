@@ -8,7 +8,7 @@ namespace LudumDare.Intro
     /// presses E to pick it up onto their shoulder.
     /// Attach to the BodyBag GameObject. Assign the player transform.
     /// </summary>
-    public class IntroBodyPickup : MonoBehaviour
+    public class IntroBodyPickup : MonoBehaviour, IBodyFinaleCarry
     {
         [Header("References")]
         [Tooltip("Player's Transform (FirstPersonController root)")]
@@ -130,6 +130,10 @@ namespace LudumDare.Intro
 
         public bool IsPickedUp => _pickedUp || _wasPickedUp;
 
+        public bool IsCarriedForFinale => IsPickedUp;
+
+        public Transform BodyTransform => transform;
+
         /// <summary>Detach body from camera so it can be placed elsewhere.</summary>
         public void Detach()
         {
@@ -137,6 +141,8 @@ namespace LudumDare.Intro
             transform.SetParent(null);
             enabled = false; // prevent re-pickup during finale
         }
+
+        public void DetachForFinale() => Detach();
 
         static float EaseOutCubic(float t)
         {

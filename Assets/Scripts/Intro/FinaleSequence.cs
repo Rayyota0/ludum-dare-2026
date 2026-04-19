@@ -12,7 +12,8 @@ namespace LudumDare.Intro
     public sealed class FinaleSequence : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] IntroBodyPickup bodyPickup;
+        [Tooltip("IntroBodyPickup or ShoulderCarryPickup on the body bag.")]
+        [SerializeField] MonoBehaviour bodyPickup;
         [SerializeField] Transform playerTransform;
         [SerializeField] Transform cameraTransform;
 
@@ -69,9 +70,12 @@ namespace LudumDare.Intro
         // Ground plug that covers the pit area
         GameObject _groundPlug;
 
+        IBodyFinaleCarry _bodyFinale;
+
         void Awake()
         {
             Debug.Log($"[Finale] Awake called on '{gameObject.name}', active={gameObject.activeInHierarchy}, enabled={enabled}");
+            _bodyFinale = bodyPickup as IBodyFinaleCarry;
             BuildUI();
         }
 
@@ -98,12 +102,12 @@ namespace LudumDare.Intro
             if (dist > triggerRadius) return;
 
             Debug.Log($"[Finale] In range (dist={dist:F1}). " +
-                      $"body={bodyPickup != null}, pickedUp={bodyPickup?.IsPickedUp}, " +
+                      $"body={_bodyFinale != null}, carried={_bodyFinale?.IsCarriedForFinale}, " +
                       $"registry={CollectedItemsRegistry.Instance != null}, " +
                       $"axe={CollectedItemsRegistry.Instance?.IsCollected("axe")}, " +
                       $"shovel={CollectedItemsRegistry.Instance?.IsCollected("shovel")}");
 
-            if (bodyPickup == null || !bodyPickup.IsPickedUp) return;
+            if (_bodyFinale == null || !_bodyFinale.IsCarriedForFinale) return;
 
             var reg = CollectedItemsRegistry.Instance;
             if (reg == null) return;
@@ -333,8 +337,8 @@ namespace LudumDare.Intro
         // ── DROP BODY ──────────────
         IEnumerator DropBody()
         {
-            bodyPickup.Detach();
-            var body = bodyPickup.transform;
+            _bodyFinale.DetachForFinale();
+            var body = _bodyFinale.BodyTransform;
 
             var breathing = body.GetComponent<BodyBagBreathing>();
             if (breathing != null) breathing.enabled = false;

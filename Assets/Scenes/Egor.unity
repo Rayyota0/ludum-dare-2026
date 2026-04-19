@@ -11856,9 +11856,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LudumDare.Pickup.ShoulderCarryPickup
   cameraTransform: {fileID: 1483032891}
-  offsetLocal: {x: -0.55, y: -0.52, z: 1.05}
-  tiltEuler: {x: 0, y: 22, z: -18}
-  carryScaleMultiplier: 0.32
+  offsetLocal: {x: -0.76, y: -0.62, z: 0.82}
+  tiltEuler: {x: 32, y: -58, z: -62}
+  carryScaleMultiplier: 0.5
+  carryPivotOffsetLocal: {x: 0.26, y: 0.08, z: -0.05}
   usePickupLerp: 1
   lerpSpeed: 3
   itemId: body_bag_carry

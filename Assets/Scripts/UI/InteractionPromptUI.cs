@@ -121,13 +121,17 @@ namespace LudumDare.UI
             var pickup = go.GetComponentInParent<IPickupable>();
             if (pickup != null)
             {
-                var item = pickup as PickupableItem;
-                if (item != null)
-                {
-                    var ctx = new PickupContext(transform.root);
-                    if (pickup.CanPickup(ctx))
-                        return $"[E] Подобрать {item.DisplayName}";
-                }
+                var ctx = new PickupContext(transform.root);
+                if (!pickup.CanPickup(ctx))
+                    return null;
+
+                if (pickup is PickupableItem item)
+                    return $"[E] Подобрать {item.DisplayName}";
+
+                if (pickup is ShoulderCarryPickup)
+                    return "[E] Поднять тело";
+
+                return "[E] Подобрать";
             }
 
             return null;
