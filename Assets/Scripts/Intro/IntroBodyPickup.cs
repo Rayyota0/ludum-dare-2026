@@ -26,6 +26,7 @@ namespace LudumDare.Intro
         public GameObject promptUI;
 
         bool _pickedUp;
+        bool _wasPickedUp;
         bool _inRange;
         float _pickupLerpT;
         Vector3 _startPos;
@@ -35,6 +36,10 @@ namespace LudumDare.Intro
         [Tooltip("Initial camera pitch (degrees down) to look at the body")]
         public float startLookDownAngle = 60f;
 
+        [Header("Auto Pickup")]
+        [Tooltip("If true, body starts already picked up and attached to camera")]
+        public bool startPickedUp;
+
         void Start()
         {
             _startPos = transform.position;
@@ -42,6 +47,16 @@ namespace LudumDare.Intro
 
             if (promptUI != null)
                 promptUI.SetActive(false);
+
+            if (startPickedUp && playerCamera != null)
+            {
+                _pickedUp = true;
+                _wasPickedUp = true;
+                _pickupLerpT = 1f;
+                foreach (var col in GetComponentsInChildren<Collider>())
+                    col.enabled = false;
+                return;
+            }
 
             // Set initial pitch on FirstPersonController so it looks down at the body
             if (playerTransform != null)
@@ -100,6 +115,7 @@ namespace LudumDare.Intro
         void PickUp()
         {
             _pickedUp = true;
+            _wasPickedUp = true;
             _pickupLerpT = 0f;
             _startPos = transform.position;
             _startRot = transform.rotation;
@@ -112,7 +128,14 @@ namespace LudumDare.Intro
                 promptUI.SetActive(false);
         }
 
-        public bool IsPickedUp => _pickedUp;
+        public bool IsPickedUp => _pickedUp || _wasPickedUp;
+
+        /// <summary>Detach body from camera so it can be placed elsewhere.</summary>
+        public void Detach()
+        {
+            _pickedUp = false;
+            transform.SetParent(null);
+        }
 
         static float EaseOutCubic(float t)
         {

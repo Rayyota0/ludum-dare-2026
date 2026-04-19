@@ -21,6 +21,10 @@ namespace LudumDare.Intro
         [Tooltip("Lock model to destroy when gate opens")]
         public GameObject lockObject;
 
+        [Header("Audio")]
+        [SerializeField] AudioClip openClip;
+        [SerializeField] float openVolume = 1f;
+
         bool _opened;
         bool _keyCollected;
 
@@ -57,6 +61,8 @@ namespace LudumDare.Intro
             // Destroy lock
             if (lockObject != null)
                 Destroy(lockObject);
+            if (openClip != null)
+                AudioSource.PlayClipAtPoint(openClip, transform.position, openVolume);
             // Slide gate up to open
             StartCoroutine(OpenAnimation());
         }

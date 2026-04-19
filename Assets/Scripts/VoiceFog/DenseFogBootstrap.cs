@@ -10,7 +10,7 @@ namespace LudumDare.VoiceFog
     {
         [SerializeField] Color fogColor = new Color(0.28f, 0.30f, 0.34f);
         [Header("Exponential fog (when Use linear fog is off)")]
-        [SerializeField] [Range(0.001f, 0.35f)] float fogDensity = 0.12f;
+        [SerializeField] [Range(0.001f, 0.35f)] float fogDensity = 0.2f;
 
         [Header("Linear fog — sharp distance cutoff, good for «wall» of whiteout")]
         [SerializeField] bool useLinearFog = false;

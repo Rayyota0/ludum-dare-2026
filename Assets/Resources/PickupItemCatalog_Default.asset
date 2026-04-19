@@ -12,10 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7e4f9c21d8b4e6f9a0b1c2d3e4f5a6b, type: 3}
   m_Name: PickupItemCatalog_Default
   entries:
-  - itemId: demo_pickup
-    displayName: Демо-предмет
-  - itemId: body_bag_carry
-    displayName: Человек в мешке
   - itemId: axe
     displayName: "Топор"
   - itemId: shovel

@@ -12,6 +12,10 @@ namespace LudumDare.Intro
         public Transform playerTransform;
         public float pickupDistance = 3f;
 
+        [Header("Audio")]
+        [SerializeField] AudioClip pickupClip;
+        [SerializeField] float pickupVolume = 1f;
+
         bool _collected;
 
         void Update()
@@ -23,6 +27,8 @@ namespace LudumDare.Intro
             if (dist < pickupDistance && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
             {
                 _collected = true;
+                if (pickupClip != null)
+                    AudioSource.PlayClipAtPoint(pickupClip, transform.position, pickupVolume);
                 gameObject.SetActive(false);
             }
         }
