@@ -6,8 +6,8 @@ using UnityEngine.InputSystem;
 namespace LudumDare.VoiceFog
 {
     /// <summary>
-    /// Optional: press <see cref="fallbackKey"/> to fake the keyword (add manually if you need it without speech).
-    /// Not added by <see cref="VoiceFogRuntimeBootstrap"/>.
+    /// Press <see cref="fallbackKey"/> to simulate the «сигнал» keyword when speech is unavailable.
+    /// <see cref="VoiceFogRuntimeBootstrap"/> adds this on the main camera when installing voice fog (Editor and Player).
     /// </summary>
     public sealed class KeyboardSignalFallback : KeywordSourceBehaviour
     {

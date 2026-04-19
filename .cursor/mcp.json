@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "anklebreaker-unity-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "anklebreaker-unity-mcp@latest"],
+      "env": {
+        "UNITY_HUB_PATH": "/usr/bin/unityhub",
+        "UNITY_BRIDGE_HOST": "127.0.0.1",
+        "UNITY_BRIDGE_PORT": "7893"
+      }
+    }
+  }
+}

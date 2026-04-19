@@ -69,6 +69,12 @@ namespace LudumDare.VoiceFog
             TryInstall(Camera.main);
         }
 
+        static void EnsureKeyboardFallback(Camera cam)
+        {
+            if (cam.GetComponent<KeyboardSignalFallback>() == null)
+                cam.gameObject.AddComponent<KeyboardSignalFallback>();
+        }
+
         static void TryInstall(Camera cam)
         {
             if (cam == null)
@@ -99,6 +105,7 @@ namespace LudumDare.VoiceFog
                 if (cam.GetComponent<FogDamageController>() == null)
                     cam.gameObject.AddComponent<FogDamageController>();
 
+                EnsureKeyboardFallback(cam);
                 return;
             }
 
@@ -117,6 +124,8 @@ namespace LudumDare.VoiceFog
 
                 if (cam.GetComponent<VoiceFogInstallMarker>() == null)
                     cam.gameObject.AddComponent<VoiceFogInstallMarker>();
+
+                EnsureKeyboardFallback(cam);
                 return;
             }
 
@@ -125,10 +134,7 @@ namespace LudumDare.VoiceFog
                 cam.gameObject.AddComponent<UniversalVolumeFogDriver>();
                 cam.gameObject.AddComponent<DenseFogBootstrap>();
                 cam.gameObject.AddComponent<VoskSignalKeywordSource>();
-#if UNITY_EDITOR
-                if (cam.GetComponent<KeyboardSignalFallback>() == null)
-                    cam.gameObject.AddComponent<KeyboardSignalFallback>();
-#endif
+                EnsureKeyboardFallback(cam);
                 cam.gameObject.AddComponent<SignalFogBurst>();
                 cam.gameObject.AddComponent<FogDamageController>();
                 cam.gameObject.AddComponent<VoiceFogInstallMarker>();
