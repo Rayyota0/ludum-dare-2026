@@ -50,12 +50,12 @@ namespace LudumDare.VoiceFog
 
         static void CreateRetryHelperIfNeeded()
         {
-            if (Object.FindObjectsByType<VoiceFogInstallRetry>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length > 0)
+            if (UnityEngine.Object.FindObjectsByType<VoiceFogInstallRetry>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length > 0)
                 return;
 
             var helper = new GameObject(nameof(VoiceFogInstallRetry));
             helper.hideFlags = HideFlags.HideAndDontSave;
-            Object.DontDestroyOnLoad(helper);
+            UnityEngine.Object.DontDestroyOnLoad(helper);
             helper.AddComponent<VoiceFogInstallRetry>();
         }
 
