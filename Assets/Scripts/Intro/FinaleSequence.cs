@@ -22,6 +22,12 @@ namespace LudumDare.Intro
         [Tooltip("Existing pit object on the scene. Will be deepened during dig phase.")]
         [SerializeField] Transform pitObject;
 
+        [Header("Tool Models")]
+        [Tooltip("Axe model prefab/asset to show during chop phase.")]
+        [SerializeField] GameObject axePrefab;
+        [Tooltip("Shovel model prefab/asset to show during dig phase.")]
+        [SerializeField] GameObject shovelPrefab;
+
         [Header("Counts")]
         [SerializeField] int chopCount = 4;
         [SerializeField] int digCount = 5;
@@ -34,10 +40,12 @@ namespace LudumDare.Intro
         [SerializeField] AudioClip coverSound;
         [SerializeField] AudioClip breathingLoop;
         [SerializeField] AudioClip sirenSound;
+        [SerializeField] AudioClip lastTheme;
         [SerializeField] float sfxVolume = 0.8f;
 
         Canvas _canvas;
         CanvasGroup _fadeGroup;
+        Image _fadeImage;
         Image _flashImage;
         Text _promptText;
         Text _endText;
@@ -46,14 +54,23 @@ namespace LudumDare.Intro
         bool _waitingForE;
         bool _ePressed;
         AudioSource _loopSource;
+        float _debugTimer;
 
         GameObject _bodyOnGround;
         GameObject _headObj;
         GameObject _holeObj;
         Vector3 _holeCenter;
 
+        // Tool visuals
+        GameObject _axeObj;
+        GameObject _shovelObj;
+
+        // Ground plug that covers the pit area
+        GameObject _groundPlug;
+
         void Awake()
         {
+            Debug.Log($"[Finale] Awake called on '{gameObject.name}', active={gameObject.activeInHierarchy}, enabled={enabled}");
             BuildUI();
         }
 
@@ -62,26 +79,42 @@ namespace LudumDare.Intro
             if (_waitingForE && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
                 _ePressed = true;
 
+            _debugTimer -= Time.deltaTime;
+            if (_debugTimer <= 0f)
+            {
+                _debugTimer = 1f;
+                float d = playerTransform != null
+                    ? Vector3.Distance(playerTransform.position, transform.position) : -1f;
+                Debug.Log($"[Finale] triggered={_triggered}, player={playerTransform != null}, " +
+                          $"dist={d:F1}, radius={triggerRadius}, enabled={enabled}, " +
+                          $"finalePos={transform.position}");
+            }
+
             if (_triggered) return;
-            if (playerTransform == null) return;
+            if (playerTransform == null) { Debug.Log("[Finale] playerTransform is null"); return; }
 
             float dist = Vector3.Distance(playerTransform.position, transform.position);
             if (dist > triggerRadius) return;
 
-            // Check body
+            Debug.Log($"[Finale] In range (dist={dist:F1}). " +
+                      $"body={bodyPickup != null}, pickedUp={bodyPickup?.IsPickedUp}, " +
+                      $"registry={CollectedItemsRegistry.Instance != null}, " +
+                      $"axe={CollectedItemsRegistry.Instance?.IsCollected("axe")}, " +
+                      $"shovel={CollectedItemsRegistry.Instance?.IsCollected("shovel")}");
+
             if (bodyPickup == null || !bodyPickup.IsPickedUp) return;
 
-            // Check items
             var reg = CollectedItemsRegistry.Instance;
             if (reg == null) return;
             bool axe = reg.IsCollected("axe"), shovel = reg.IsCollected("shovel");
             if (!axe || !shovel)
             {
-                _triggered = true; // prevent spam
+                _triggered = true;
                 StartCoroutine(ShowMissing(axe, shovel));
                 return;
             }
 
+            Debug.Log("[Finale] All conditions met — starting finale!");
             _triggered = true;
             StartCoroutine(Run());
         }
@@ -101,7 +134,7 @@ namespace LudumDare.Intro
             ShowPrompt(msg);
             yield return new WaitForSeconds(3f);
             HidePrompt();
-            _triggered = false; // allow re-entry
+            _triggered = false;
         }
 
         // ════════════════════════════
@@ -109,22 +142,36 @@ namespace LudumDare.Intro
         // ════════════════════════════
         IEnumerator Run()
         {
-            // Lock player
             var fpc = playerTransform.GetComponent<FirstPersonController>();
             if (fpc != null) fpc.enabled = false;
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            // Kill fog noise, footsteps, music
+            var interactionUI = FindFirstObjectByType<UI.InteractionPromptUI>();
+            if (interactionUI != null) interactionUI.enabled = false;
+            var pickupInput = playerTransform.GetComponent<PickupInteractInput>();
+            if (pickupInput != null) pickupInput.enabled = false;
+
             MuteAllAudio();
 
-            // Breathing
             if (breathingLoop != null)
             {
+                var breathSource = gameObject.AddComponent<AudioSource>();
+                breathSource.clip = breathingLoop;
+                breathSource.loop = true;
+                breathSource.volume = 0.4f;
+                breathSource.Play();
+            }
+
+            BuildTools();
+
+            // Start last theme at the beginning of the finale
+            if (lastTheme != null)
+            {
                 _loopSource = gameObject.AddComponent<AudioSource>();
-                _loopSource.clip = breathingLoop;
+                _loopSource.clip = lastTheme;
                 _loopSource.loop = true;
-                _loopSource.volume = 0.4f;
+                _loopSource.volume = 0.3f;
                 _loopSource.Play();
             }
 
@@ -142,21 +189,17 @@ namespace LudumDare.Intro
 
         void MuteAllAudio()
         {
-            // Stop all audio sources on player (footsteps, drag, fog hiss, etc.)
             foreach (var src in playerTransform.GetComponentsInChildren<AudioSource>())
                 src.Stop();
 
-            // Stop fog damage controller effects
             var fogDmg = FindFirstObjectByType<VoiceFog.FogDamageController>();
             if (fogDmg != null) fogDmg.enabled = false;
 
-            // Stop footsteps and body drag
             var footsteps = playerTransform.GetComponent<FootstepSounds>();
             if (footsteps != null) footsteps.enabled = false;
             var drag = playerTransform.GetComponent<BodyDragSounds>();
             if (drag != null) drag.enabled = false;
 
-            // Stop music
             var music = FindFirstObjectByType<Audio.MusicLoop>();
             if (music != null) music.enabled = false;
             foreach (var src in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
@@ -166,21 +209,142 @@ namespace LudumDare.Intro
             }
         }
 
+        // ════════════════════════════
+        //  GROUND SPLIT
+        // ════════════════════════════
+
+        /// <summary>
+        /// Replaces Burial_Ground with pieces around the pit + a removable plug over the pit.
+        /// </summary>
+        void SplitGroundAroundPit()
+        {
+            var burialGround = GameObject.Find("Burial_Ground");
+            if (burialGround == null) return;
+
+            var groundRenderer = burialGround.GetComponent<Renderer>();
+            Material groundMat = groundRenderer != null ? groundRenderer.material : null;
+
+            // Get Burial_Ground bounds
+            var bgPos = burialGround.transform.position;   // (0, 0.1, 53)
+            var bgScale = burialGround.transform.localScale; // (14, 0.1, 22)
+            float groundY = bgPos.y;
+            float groundH = bgScale.y;
+
+            float minX = bgPos.x - bgScale.x / 2f;
+            float maxX = bgPos.x + bgScale.x / 2f;
+            float minZ = bgPos.z - bgScale.z / 2f;
+            float maxZ = bgPos.z + bgScale.z / 2f;
+
+            // Hole extents (slightly bigger than the pit scale 1.5 x 2.2)
+            float holeHalfX = 0.9f;
+            float holeHalfZ = 1.3f;
+            float hMinX = _holeCenter.x - holeHalfX;
+            float hMaxX = _holeCenter.x + holeHalfX;
+            float hMinZ = _holeCenter.z - holeHalfZ;
+            float hMaxZ = _holeCenter.z + holeHalfZ;
+
+            // Hide original
+            burialGround.SetActive(false);
+
+            var parent = new GameObject("SplitGround");
+
+            // South piece: full width, from minZ to hMinZ
+            CreateGroundPiece(parent.transform, "Ground_S", groundMat, groundY, groundH,
+                minX, maxX, minZ, hMinZ);
+
+            // North piece: full width, from hMaxZ to maxZ
+            CreateGroundPiece(parent.transform, "Ground_N", groundMat, groundY, groundH,
+                minX, maxX, hMaxZ, maxZ);
+
+            // West piece: between hole Z range, from minX to hMinX
+            CreateGroundPiece(parent.transform, "Ground_W", groundMat, groundY, groundH,
+                minX, hMinX, hMinZ, hMaxZ);
+
+            // East piece: between hole Z range, from hMaxX to maxX
+            CreateGroundPiece(parent.transform, "Ground_E", groundMat, groundY, groundH,
+                hMaxX, maxX, hMinZ, hMaxZ);
+
+            // Plug: covers the hole, will be hidden when digging
+            _groundPlug = CreateGroundPiece(parent.transform, "Ground_Plug", groundMat, groundY, groundH,
+                hMinX, hMaxX, hMinZ, hMaxZ);
+        }
+
+        GameObject CreateGroundPiece(Transform parent, string name, Material mat,
+            float y, float height, float x0, float x1, float z0, float z1)
+        {
+            var piece = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            piece.name = name;
+            piece.transform.SetParent(parent, true);
+
+            float cx = (x0 + x1) / 2f;
+            float cz = (z0 + z1) / 2f;
+            float sx = x1 - x0;
+            float sz = z1 - z0;
+
+            piece.transform.position = new Vector3(cx, y, cz);
+            piece.transform.localScale = new Vector3(sx, height, sz);
+
+            if (mat != null)
+            {
+                var r = piece.GetComponent<Renderer>();
+                if (r != null) r.material = mat;
+            }
+
+            return piece;
+        }
+
+        // ════════════════════════════
+        //  TOOL VISUALS
+        // ════════════════════════════
+        void BuildTools()
+        {
+            if (cameraTransform == null) return;
+
+            if (axePrefab != null)
+            {
+                _axeObj = Instantiate(axePrefab, cameraTransform);
+                _axeObj.name = "FinaleAxe";
+                _axeObj.transform.localPosition = Vector3.zero;
+                _axeObj.transform.localRotation = Quaternion.identity;
+                _axeObj.transform.localScale = Vector3.one;
+                foreach (var col in _axeObj.GetComponentsInChildren<Collider>()) Destroy(col);
+                _axeObj.SetActive(false);
+            }
+
+            if (shovelPrefab != null)
+            {
+                _shovelObj = Instantiate(shovelPrefab, cameraTransform);
+                _shovelObj.name = "FinaleShovel";
+                _shovelObj.transform.localPosition = Vector3.zero;
+                _shovelObj.transform.localRotation = Quaternion.identity;
+                _shovelObj.transform.localScale = Vector3.one;
+                foreach (var col in _shovelObj.GetComponentsInChildren<Collider>()) Destroy(col);
+                _shovelObj.SetActive(false);
+            }
+        }
+
+        static void DestroyCollider(GameObject go)
+        {
+            var col = go.GetComponent<Collider>();
+            if (col != null) Destroy(col);
+        }
+
         // ── DROP BODY ──────────────
         IEnumerator DropBody()
         {
             bodyPickup.Detach();
             var body = bodyPickup.transform;
 
-            var dropTarget = playerTransform.position + playerTransform.forward * 2f;
-            dropTarget.y = 0.25f;
+            var breathing = body.GetComponent<BodyBagBreathing>();
+            if (breathing != null) breathing.enabled = false;
 
-            // Use existing pit from scene, or create one
+            // Setup pit first so _holeCenter is valid
             if (pitObject != null)
             {
                 _holeObj = pitObject.gameObject;
                 _holeCenter = pitObject.position;
                 _holeCenter.y = 0f;
+                SetColor(_holeObj, new Color(0.04f, 0.02f, 0.01f));
             }
             else
             {
@@ -197,10 +361,17 @@ namespace LudumDare.Intro
             var holeCol = _holeObj.GetComponent<Collider>();
             if (holeCol != null) Destroy(holeCol);
 
-            // Drop body
+            SplitGroundAroundPit();
+
+            // Drop body next to pit (between player and pit)
+            var toHole = (_holeCenter - playerTransform.position).normalized;
+            var dropTarget = _holeCenter - toHole * 1.2f;
+            dropTarget.y = 0.25f;
+
+            // Drop body — rotated 90° so it lies across
             var startPos = body.position;
             var startRot = body.rotation;
-            var endRot = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(0, 0, 5f);
+            var endRot = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(0, 90f, 5f);
 
             yield return Animate(body, startPos, dropTarget, startRot, endRot, 0.8f);
 
@@ -223,33 +394,28 @@ namespace LudumDare.Intro
                 yield return WaitE();
                 HidePrompt();
 
-                // Axe swing animation
                 yield return AxeSwing();
 
                 PlaySfx(chopSound, bodyPos);
-                yield return RedFlash(0.1f);
+                yield return RedFlash(0.15f);
 
-                // Body twitches
                 var orig = _bodyOnGround.transform.position;
                 _bodyOnGround.transform.position += new Vector3(
-                    Random.Range(-0.03f, 0.03f), 0, Random.Range(-0.03f, 0.03f));
+                    Random.Range(-0.05f, 0.05f), 0, Random.Range(-0.05f, 0.05f));
                 yield return new WaitForSeconds(0.06f);
                 _bodyOnGround.transform.position = orig;
 
                 yield return new WaitForSeconds(0.35f);
             }
 
-            // Head detaches
             var headPos = bodyPos + _bodyOnGround.transform.forward * 0.5f + Vector3.up * 0.1f;
             _headObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             _headObj.name = "Head";
             _headObj.transform.position = headPos;
             _headObj.transform.localScale = Vector3.one * 0.2f;
             SetColor(_headObj, new Color(0.2f, 0.1f, 0.08f));
-            var headCol = _headObj.GetComponent<Collider>();
-            if (headCol != null) Destroy(headCol);
+            DestroyCollider(_headObj);
 
-            // Roll
             var rollEnd = headPos + _bodyOnGround.transform.right * 0.7f;
             rollEnd.y = 0.1f;
             float t = 0;
@@ -265,6 +431,10 @@ namespace LudumDare.Intro
         // ── DIG ────────────────────
         IEnumerator DigPhase()
         {
+            // Remove the ground plug to reveal the pit
+            if (_groundPlug != null)
+                _groundPlug.SetActive(false);
+
             yield return LookAt(_holeCenter, 0.5f);
             yield return new WaitForSeconds(0.3f);
 
@@ -274,11 +444,10 @@ namespace LudumDare.Intro
                 yield return WaitE();
                 HidePrompt();
 
-                yield return ShovelDig();
+                yield return ShovelDigAnim();
 
                 PlaySfx(digSound, _holeCenter);
 
-                // Pit deepens
                 float progress = (float)(i + 1) / digCount;
                 float depth = Mathf.Lerp(0.06f, 1.5f, progress);
                 _holeObj.transform.localScale = new Vector3(1.5f, depth, 2.2f);
@@ -298,7 +467,8 @@ namespace LudumDare.Intro
             if (_bodyOnGround != null)
             {
                 var start = _bodyOnGround.transform.position;
-                var end = _holeCenter + Vector3.down * 0.5f;
+                float pitDepth = _holeObj.transform.localScale.y;
+                var end = _holeCenter + Vector3.down * (pitDepth * 0.6f);
                 yield return Animate(_bodyOnGround.transform, start, end, 1f);
                 PlaySfx(bodyDropSound, end);
                 yield return Shake(0.08f, 0.015f);
@@ -307,7 +477,7 @@ namespace LudumDare.Intro
             if (_headObj != null)
             {
                 var hs = _headObj.transform.position;
-                var he = _holeCenter + Vector3.down * 0.3f;
+                var he = _holeCenter + Vector3.down * (_holeObj.transform.localScale.y * 0.4f);
                 float t = 0;
                 while (t < 1f)
                 {
@@ -323,14 +493,17 @@ namespace LudumDare.Intro
         // ── COVER ──────────────────
         IEnumerator CoverPhase()
         {
+            // Dirt fill that rises from pit bottom to ground level
+            float pitDepth = _holeObj.transform.localScale.y; // current pit depth
+            float pitBottom = _holeCenter.y - pitDepth;
+
             var cover = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cover.name = "Dirt";
             cover.transform.rotation = _holeObj.transform.rotation;
-            cover.transform.localScale = new Vector3(1.5f, 0.01f, 2.2f);
-            cover.transform.position = _holeCenter + Vector3.down * 0.7f;
+            cover.transform.localScale = new Vector3(1.4f, 0.01f, 2.1f);
+            cover.transform.position = new Vector3(_holeCenter.x, pitBottom, _holeCenter.z);
             SetColor(cover, new Color(0.12f, 0.08f, 0.04f));
-            var coverCol = cover.GetComponent<Collider>();
-            if (coverCol != null) Destroy(coverCol);
+            DestroyCollider(cover);
 
             for (int i = 0; i < coverCount; i++)
             {
@@ -338,19 +511,24 @@ namespace LudumDare.Intro
                 yield return WaitE();
                 HidePrompt();
 
-                yield return ShovelDig();
+                yield return ShovelDigAnim();
                 PlaySfx(coverSound != null ? coverSound : digSound, _holeCenter);
 
+                // Fill rises from pit bottom up to ground level (y~0.1)
                 float progress = (float)(i + 1) / coverCount;
-                float h = Mathf.Lerp(0.01f, 1.5f, progress);
-                cover.transform.localScale = new Vector3(1.5f, h, 2.2f);
-                cover.transform.position = _holeCenter + Vector3.down * (0.7f - h / 2f);
+                float fillH = Mathf.Lerp(0.01f, pitDepth, progress);
+                cover.transform.localScale = new Vector3(1.4f, fillH, 2.1f);
+                cover.transform.position = new Vector3(_holeCenter.x, pitBottom + fillH / 2f, _holeCenter.z);
 
                 yield return new WaitForSeconds(0.15f);
             }
 
             if (_bodyOnGround != null) _bodyOnGround.SetActive(false);
             if (_headObj != null) _headObj.SetActive(false);
+
+            // Restore ground plug over the filled hole
+            if (_groundPlug != null)
+                _groundPlug.SetActive(true);
 
             yield return new WaitForSeconds(1.5f);
         }
@@ -359,6 +537,7 @@ namespace LudumDare.Intro
         IEnumerator Finale()
         {
             HidePrompt();
+            if (_shovelObj != null) _shovelObj.SetActive(false);
 
             if (_loopSource != null)
             {
@@ -377,7 +556,6 @@ namespace LudumDare.Intro
 
             yield return new WaitForSeconds(2f);
 
-            // Fade to black
             for (float f = 0; f < 1f; f += Time.deltaTime * 0.25f)
             {
                 _fadeGroup.alpha = f;
@@ -387,7 +565,6 @@ namespace LudumDare.Intro
 
             yield return new WaitForSeconds(2.5f);
 
-            // End text
             _endText.gameObject.SetActive(true);
             var c = _endText.color;
             for (float f = 0; f < 1f; f += Time.deltaTime * 0.4f)
@@ -402,63 +579,108 @@ namespace LudumDare.Intro
         }
 
         // ════════════════════════════
-        //  ANIMATIONS
+        //  TOOL ANIMATIONS
         // ════════════════════════════
 
         IEnumerator AxeSwing()
         {
-            if (cameraTransform == null) yield break;
-            var origRot = cameraTransform.localRotation;
-            var origPos = cameraTransform.localPosition;
+            if (_axeObj == null) yield break;
+            _axeObj.SetActive(true);
 
-            // Wind up
-            for (float t = 0; t < 1f; t += Time.deltaTime * 6f)
+            var tr = _axeObj.transform;
+
+            var restPos = new Vector3(0.35f, 0.15f, 0.5f);
+            var raisedPos = new Vector3(0.3f, 0.45f, 0.4f);
+            var raisedRot = Quaternion.Euler(-30f, 0f, -20f);
+            var impactPos = new Vector3(0.15f, -0.15f, 0.55f);
+            var impactRot = Quaternion.Euler(40f, 0f, 10f);
+
+            tr.localPosition = restPos;
+            tr.localRotation = Quaternion.identity;
+
+            // Raise up
+            for (float t = 0; t < 1f; t += Time.deltaTime * 4f)
             {
-                cameraTransform.localRotation = origRot * Quaternion.Euler(-3f * t, 0, 0);
+                float e = t * t;
+                tr.localPosition = Vector3.Lerp(restPos, raisedPos, e);
+                tr.localRotation = Quaternion.Slerp(Quaternion.identity, raisedRot, e);
                 yield return null;
             }
-            // Swing down
+
+            // Swing down fast
             for (float t = 0; t < 1f; t += Time.deltaTime * 12f)
             {
-                float angle = Mathf.Lerp(-3f, 10f, t * t);
-                cameraTransform.localRotation = origRot * Quaternion.Euler(angle, 0, Random.Range(-0.3f, 0.3f));
+                float e = t * t;
+                tr.localPosition = Vector3.Lerp(raisedPos, impactPos, e);
+                tr.localRotation = Quaternion.Slerp(raisedRot, impactRot, e);
                 yield return null;
             }
-            // Impact
-            yield return Shake(0.06f, 0.015f);
-            // Return
-            for (float t = 0; t < 1f; t += Time.deltaTime * 4f)
+
+            yield return Shake(0.08f, 0.025f);
+
+            // Return and hide
+            for (float t = 0; t < 1f; t += Time.deltaTime * 5f)
             {
-                cameraTransform.localRotation = Quaternion.Slerp(
-                    origRot * Quaternion.Euler(10f, 0, 0), origRot, t);
-                cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, origPos, t);
+                tr.localPosition = Vector3.Lerp(impactPos, restPos, t);
+                tr.localRotation = Quaternion.Slerp(impactRot, Quaternion.identity, t);
                 yield return null;
             }
-            cameraTransform.localRotation = origRot;
-            cameraTransform.localPosition = origPos;
+
+            _axeObj.SetActive(false);
         }
 
-        IEnumerator ShovelDig()
+        IEnumerator ShovelDigAnim()
         {
-            if (cameraTransform == null) yield break;
-            var origRot = cameraTransform.localRotation;
-            var origPos = cameraTransform.localPosition;
+            Debug.Log($"[Finale] ShovelDigAnim called, shovelObj={_shovelObj != null}");
+            if (_shovelObj == null) yield break;
+            _shovelObj.SetActive(true);
 
+            var tr = _shovelObj.transform;
+            Debug.Log($"[Finale] Shovel pos={tr.localPosition}, rot={tr.localEulerAngles}, scale={tr.localScale}");
+
+            var restPos = new Vector3(0.4f, -0.2f, 1.0f);
+            var restRot = Quaternion.Euler(59f, -152f, -255f);
+            var raisePos = new Vector3(0.35f, 0.15f, 0.9f);
+            var raiseRot = Quaternion.Euler(20f, -152f, -255f);
+            var digPos = new Vector3(0.3f, -0.5f, 1.1f);
+            var digRot = Quaternion.Euler(90f, -152f, -255f);
+
+            tr.localPosition = restPos;
+            tr.localRotation = restRot;
+
+            // Raise shovel
             for (float t = 0; t < 1f; t += Time.deltaTime * 4f)
             {
-                float pitch = Mathf.Sin(t * Mathf.PI) * 6f;
-                float sway = Mathf.Sin(t * Mathf.PI * 0.5f) * 1.5f;
-                cameraTransform.localRotation = origRot * Quaternion.Euler(pitch, sway, 0);
-                cameraTransform.localPosition = origPos + Vector3.down * (Mathf.Sin(t * Mathf.PI) * 0.03f);
+                float e = t * t * (3f - 2f * t);
+                tr.localPosition = Vector3.Lerp(restPos, raisePos, e);
+                tr.localRotation = Quaternion.Slerp(restRot, raiseRot, e);
                 yield return null;
             }
-            cameraTransform.localRotation = origRot;
-            cameraTransform.localPosition = origPos;
+
+            // Plunge down
+            for (float t = 0; t < 1f; t += Time.deltaTime * 6f)
+            {
+                float e = t * t;
+                tr.localPosition = Vector3.Lerp(raisePos, digPos, e);
+                tr.localRotation = Quaternion.Slerp(raiseRot, digRot, e);
+                yield return null;
+            }
+
+            yield return Shake(0.04f, 0.01f);
+
+            // Lift back
+            for (float t = 0; t < 1f; t += Time.deltaTime * 3f)
+            {
+                float e = t * t * (3f - 2f * t);
+                tr.localPosition = Vector3.Lerp(digPos, restPos, e);
+                tr.localRotation = Quaternion.Slerp(digRot, restRot, e);
+                yield return null;
+            }
         }
 
         // ════════════════════════════
         //  UI
-        // ════════════════════════════
+        // ═��══════════════════════════
         void BuildUI()
         {
             var go = new GameObject("FinaleCanvas");
@@ -467,15 +689,19 @@ namespace LudumDare.Intro
             _canvas.sortingOrder = 200;
             go.AddComponent<CanvasScaler>();
 
-            _fadeGroup = go.AddComponent<CanvasGroup>();
+            var fadeHolder = new GameObject("FadeHolder");
+            fadeHolder.transform.SetParent(go.transform, false);
+            var fadeHolderRT = fadeHolder.AddComponent<RectTransform>();
+            Stretch(fadeHolderRT);
+            _fadeGroup = fadeHolder.AddComponent<CanvasGroup>();
             _fadeGroup.alpha = 0;
             _fadeGroup.blocksRaycasts = false;
 
-            var fade = new GameObject("Fade").AddComponent<Image>();
-            fade.transform.SetParent(go.transform, false);
-            fade.color = Color.black;
-            fade.raycastTarget = false;
-            Stretch(fade.rectTransform);
+            _fadeImage = new GameObject("Fade").AddComponent<Image>();
+            _fadeImage.transform.SetParent(fadeHolder.transform, false);
+            _fadeImage.color = Color.black;
+            _fadeImage.raycastTarget = false;
+            Stretch(_fadeImage.rectTransform);
 
             _flashImage = new GameObject("Flash").AddComponent<Image>();
             _flashImage.transform.SetParent(go.transform, false);
@@ -486,8 +712,8 @@ namespace LudumDare.Intro
             _promptText = new GameObject("Prompt").AddComponent<Text>();
             _promptText.transform.SetParent(go.transform, false);
             _promptText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _promptText.fontSize = 18;
-            _promptText.color = new Color(0.7f, 0.7f, 0.65f, 0.45f);
+            _promptText.fontSize = 28;
+            _promptText.color = new Color(0.8f, 0.8f, 0.75f, 0.7f);
             _promptText.alignment = TextAnchor.MiddleCenter;
             var ol = _promptText.gameObject.AddComponent<Outline>();
             ol.effectColor = new Color(0, 0, 0, 0.4f);
@@ -495,7 +721,7 @@ namespace LudumDare.Intro
             var prt = _promptText.rectTransform;
             prt.anchorMin = new Vector2(0.5f, 0.18f);
             prt.anchorMax = new Vector2(0.5f, 0.18f);
-            prt.sizeDelta = new Vector2(150, 30);
+            prt.sizeDelta = new Vector2(400, 40);
             _promptText.gameObject.SetActive(false);
 
             _endText = new GameObject("End").AddComponent<Text>();
@@ -543,11 +769,11 @@ namespace LudumDare.Intro
 
         IEnumerator RedFlash(float dur)
         {
-            _flashImage.color = new Color(0.5f, 0, 0, 0.2f);
+            _flashImage.color = new Color(0.6f, 0, 0, 0.4f);
             for (float t = 0; t < dur; t += Time.deltaTime)
             {
                 var c = _flashImage.color;
-                c.a = Mathf.Lerp(0.2f, 0, t / dur);
+                c.a = Mathf.Lerp(0.4f, 0, t / dur);
                 _flashImage.color = c;
                 yield return null;
             }
@@ -560,7 +786,10 @@ namespace LudumDare.Intro
             var from = cameraTransform.rotation;
             var to = Quaternion.LookRotation((target - cameraTransform.position).normalized);
             for (float t = 0; t < 1f; t += Time.deltaTime / dur)
+            {
                 cameraTransform.rotation = Quaternion.Slerp(from, to, t * t * (3f - 2f * t));
+                yield return null;
+            }
             cameraTransform.rotation = to;
         }
 

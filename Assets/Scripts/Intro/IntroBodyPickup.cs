@@ -135,6 +135,7 @@ namespace LudumDare.Intro
         {
             _pickedUp = false;
             transform.SetParent(null);
+            enabled = false; // prevent re-pickup during finale
         }
 
         static float EaseOutCubic(float t)

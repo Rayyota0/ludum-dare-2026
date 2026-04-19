@@ -16,6 +16,7 @@ namespace LudumDare.Pickup
         [SerializeField] Transform cameraTransform;
         [SerializeField] float maxDistance = 3f;
         [SerializeField] LayerMask pickupLayers = ~0;
+        [SerializeField] AudioClip pickupSound;
 
         readonly RaycastHit[] _rayHits = new RaycastHit[MaxRayHits];
 
@@ -41,6 +42,8 @@ namespace LudumDare.Pickup
                 return false;
 
             pickupable.OnPickup(ctx);
+            if (pickupSound != null)
+                AudioSource.PlayClipAtPoint(pickupSound, cameraTransform.position);
             return true;
         }
 
