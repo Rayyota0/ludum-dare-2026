@@ -14,3 +14,5 @@ MonoBehaviour:
   entries:
   - itemId: demo_pickup
     displayName: Демо-предмет
+  - itemId: body_bag_carry
+    displayName: Человек в мешке
