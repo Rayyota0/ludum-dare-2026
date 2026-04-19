@@ -717,7 +717,7 @@ namespace LudumDare.Intro
             _promptText = new GameObject("Prompt").AddComponent<Text>();
             _promptText.transform.SetParent(go.transform, false);
             _promptText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _promptText.fontSize = 28;
+            _promptText.fontSize = 36;
             _promptText.color = new Color(0.8f, 0.8f, 0.75f, 0.7f);
             _promptText.alignment = TextAnchor.MiddleCenter;
             var ol = _promptText.gameObject.AddComponent<Outline>();
@@ -730,7 +730,7 @@ namespace LudumDare.Intro
             _endText = new GameObject("End").AddComponent<Text>();
             _endText.transform.SetParent(go.transform, false);
             _endText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _endText.fontSize = 48;
+            _endText.fontSize = 60;
             _endText.color = new Color(0.85f, 0.85f, 0.8f, 0f);
             _endText.alignment = TextAnchor.MiddleCenter;
             _endText.text = "КОНЕЦ";

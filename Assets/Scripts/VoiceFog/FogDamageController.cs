@@ -312,10 +312,10 @@ namespace LudumDare.VoiceFog
 
             _gameOverText = textGo.AddComponent<Text>();
             _gameOverText.text = "ВЫ ПОГЛОЩЕНЫ ТУМАНОМ";
-            _gameOverText.font = Font.CreateDynamicFontFromOSFont("Arial", 64);
+            _gameOverText.font = Font.CreateDynamicFontFromOSFont("Arial", 80);
             if (_gameOverText.font == null)
-                _gameOverText.font = Resources.GetBuiltinResource<Font>("LegacySRuntime.ttf");
-            _gameOverText.fontSize = 64;
+                _gameOverText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _gameOverText.fontSize = 80;
             _gameOverText.alignment = TextAnchor.MiddleCenter;
             _gameOverText.color = new Color(0.7f, 0.1f, 0.1f, 1f);
             _gameOverText.raycastTarget = false;

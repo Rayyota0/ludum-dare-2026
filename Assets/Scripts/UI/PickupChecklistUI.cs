@@ -52,8 +52,8 @@ namespace LudumDare.UI
         {
             const float marginX = 12f / UiOverlayLayout.ReferenceWidth;
             const float marginY = 12f / UiOverlayLayout.ReferenceHeight;
-            const float panelW = 200f / UiOverlayLayout.ReferenceWidth;
-            const float panelH = 80f / UiOverlayLayout.ReferenceHeight;
+            const float panelW = 280f / UiOverlayLayout.ReferenceWidth;
+            const float panelH = 110f / UiOverlayLayout.ReferenceHeight;
             UiOverlayLayout.SetTopLeftPanelFractions(panelRt, marginX, marginY, panelW, panelH);
         }
 
@@ -120,14 +120,14 @@ namespace LudumDare.UI
 
                 var text = go.GetComponent<Text>();
                 text.font = rowFont != null ? rowFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                text.fontSize = 13;
+                text.fontSize = 18;
                 text.color = new Color(0.7f, 0.7f, 0.65f, 0.6f);
                 text.alignment = TextAnchor.MiddleLeft;
                 text.horizontalOverflow = HorizontalWrapMode.Wrap;
                 text.verticalOverflow = VerticalWrapMode.Overflow;
 
                 var le = go.AddComponent<LayoutElement>();
-                le.minHeight = 18f;
+                le.minHeight = 24f;
 
                 _rows[i] = text;
             }

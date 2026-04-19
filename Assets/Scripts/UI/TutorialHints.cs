@@ -50,7 +50,7 @@ namespace LudumDare.UI
 
             _text = textGo.AddComponent<Text>();
             _text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _text.fontSize = 26;
+            _text.fontSize = 34;
             _text.color = new Color(0.9f, 0.9f, 0.85f, 1f);
             _text.alignment = TextAnchor.MiddleCenter;
             _text.horizontalOverflow = HorizontalWrapMode.Overflow;

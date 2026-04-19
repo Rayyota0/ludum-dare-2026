@@ -44,7 +44,7 @@ namespace LudumDare.UI
 
             _text = textGo.AddComponent<Text>();
             _text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _text.fontSize = 22;
+            _text.fontSize = 30;
             _text.color = Color.white;
             _text.alignment = TextAnchor.MiddleCenter;
 
