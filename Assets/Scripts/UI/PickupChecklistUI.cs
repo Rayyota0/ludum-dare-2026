@@ -44,7 +44,8 @@ namespace LudumDare.UI
             var canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 40;
-            canvasGo.AddComponent<CanvasScaler>();
+            var scaler = canvasGo.AddComponent<CanvasScaler>();
+            CanvasScalerSetup.ApplyScreenSpaceScale(scaler);
             var cg = canvasGo.AddComponent<CanvasGroup>();
             cg.blocksRaycasts = false;
             cg.interactable = false;

@@ -43,7 +43,8 @@ namespace LudumDare.UI
             var canvas = canvasGO.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100;
-            canvasGO.AddComponent<CanvasScaler>();
+            var scaler = canvasGO.AddComponent<CanvasScaler>();
+            CanvasScalerSetup.ApplyScreenSpaceScale(scaler);
 
             // Bar background
             var bgGO = new GameObject("BarBG");

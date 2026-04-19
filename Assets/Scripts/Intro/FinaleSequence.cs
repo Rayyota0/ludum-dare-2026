@@ -1,6 +1,7 @@
 using System.Collections;
 using LudumDare.Pickup;
 using LudumDare.Player;
+using LudumDare.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -465,7 +466,8 @@ namespace LudumDare.Intro
             _canvas = go.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 200;
-            go.AddComponent<CanvasScaler>();
+            var scaler = go.AddComponent<CanvasScaler>();
+            CanvasScalerSetup.ApplyScreenSpaceScale(scaler);
 
             _fadeGroup = go.AddComponent<CanvasGroup>();
             _fadeGroup.alpha = 0;

@@ -2,7 +2,7 @@
   "mcpServers": {
     "anklebreaker-unity-mcp": {
       "type": "stdio",
-      "command": "npx",
+      "command": "/home/egor/.local/bin/npx",
       "args": ["-y", "anklebreaker-unity-mcp@latest"],
       "env": {
         "UNITY_HUB_PATH": "/usr/bin/unityhub",
